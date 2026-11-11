@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794416272007,
+      "tag": "0000_procurement_continuity_backend",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794416308917,
+      "tag": "0001_search_chunks_or_terms",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794416317973,
+      "tag": "0002_search_chunks_or_terms",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794416336908,
+      "tag": "0003_search_chunks_idf_ranking",
+      "breakpoints": true
+    }
+  ]
+}
