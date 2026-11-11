@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Application architecture
+- Keep both procurement tabs in one dashboard at `/`; they are two views of one continuous workspace.
+- Keep simulated contract terms and task allocations in a browser-safe demo module; no uploaded documents are actually parsed or persisted.
+- Define application visual treatments in the global design system and use the shared Button for interactive actions.
