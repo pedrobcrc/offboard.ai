@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ArrowDownToLine, ArrowRight, ArrowUp, ArrowUpRight, Bell, BookOpen, Check, CheckCheck, ChevronRight, CircleCheck, Clock3, FileSpreadsheet, FileText, GitBranch, Layers3, Loader2, LockKeyhole, Mail, MoreHorizontal, Network, PanelLeftClose, PanelLeftOpen, ShieldCheck, Sparkles, UploadCloud, Users, Zap } from "lucide-react";
+import { ArrowDownToLine, ArrowRight, ArrowUp, ArrowUpRight, Bell, BookOpen, Check, CheckCheck, ChevronRight, CircleCheck, Clock3, FileSpreadsheet, FileText, GitBranch, Layers3, Loader2, LockKeyhole, Mail, MoreHorizontal, Network, ShieldCheck, Sparkles, UploadCloud, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { allocations, getDemoAnswer, indexedFiles, team } from "@/lib/procurement-demo";
 
@@ -28,11 +28,17 @@ function Dashboard() {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [allocationState, setAllocationState] = useState<"idle" | "loading" | "done">("idle");
-  const [sidebarHidden, setSidebarHidden] = useState(false);
+  const [sidebarPeeking, setSidebarPeeking] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const history = useRef<HTMLDivElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { timers.current.forEach(clearTimeout); if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
+  function peek(on: boolean) {
+    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; }
+    if (on) setSidebarPeeking(true);
+    else closeTimer.current = setTimeout(() => setSidebarPeeking(false), 180);
+  }
   useEffect(() => { if (messages.length || thinking) history.current?.scrollTo({ top: history.current.scrollHeight, behavior: "smooth" }); }, [messages, thinking]);
 
   function ask(question: string) {
@@ -59,14 +65,14 @@ function Dashboard() {
     timers.current.push(setTimeout(() => setAllocationState("done"), 1500));
   }
   const tabs = [{ id: "knowledge" as const, label: "Knowledge Retriever", icon: BookOpen }, { id: "tasks" as const, label: "Task Router", icon: GitBranch }];
-  return <div className={`app-shell ${sidebarHidden ? "sidebar-hidden" : ""}`}>
-    <button type="button" className="sidebar-toggle" onClick={() => setSidebarHidden((hidden) => !hidden)} aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"} aria-expanded={!sidebarHidden}>{sidebarHidden ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}</button>
-    <aside className="sidebar" aria-hidden={sidebarHidden}>
+  return <div className="app-shell">
+    <div className="sidebar-hover-zone" aria-hidden="true" onMouseEnter={() => peek(true)} />
+    <aside className={`sidebar ${sidebarPeeking ? "peeking" : ""}`} onMouseLeave={() => peek(false)} onFocusCapture={() => peek(true)} onKeyDown={(event) => { if (event.key === "Escape") peek(false); }}>
       <div><div className="brand"><span className="brand-icon"><Network size={23} strokeWidth={1.8} /></span><span>Offboard<span className="brand-ai">.AI</span></span></div><p className="brand-subtitle">Procurement continuity engine</p></div>
       <nav aria-label="Main navigation"><p className="nav-label">WORKSPACE</p>{tabs.map(({ id, label, icon: Icon }) => <Button key={id} variant="ghost" className={`nav-button ${view === id ? "active" : ""}`} onClick={() => setView(id)} aria-current={view === id ? "page" : undefined}><Icon size={18} />{label}{view === id && <ChevronRight className="ml-auto" size={14} />}</Button>)}</nav>
       <div className="sidebar-bottom"><div className="workspace-box"><div className="flex items-center gap-2"><span className="status-dot" /><strong className="text-[11px]">Continuity workspace</strong></div><p>Your knowledge stays.<br />Your business moves forward.</p><div className="mt-3 flex items-center gap-1.5 text-[9px] text-muted-foreground"><ShieldCheck size={12} /> Private demo environment</div></div><div className="profile"><span className="avatar">AC</span><div><strong>Alex Carter</strong><p>Procurement Manager</p></div><span className="ml-auto text-muted-foreground"><MoreHorizontal size={16} /></span></div></div>
     </aside>
-    <div className="main-shell"><header className="topbar"><div className="breadcrumb"><Layers3 size={15} /><span>Workspace</span><ChevronRight size={12} /><strong>{view === "knowledge" ? "Knowledge Retriever" : "Task Router"}</strong></div><div className="topbar-right"><span className="online"><span className="status-dot" /> Workspace active</span><span className="demo-tag">DEMO</span><span className="text-muted-foreground" title="No new notifications"><Bell size={17} /></span><span className="avatar">AC</span></div></header>
+    <div className="main-shell" onMouseEnter={() => peek(false)}><header className="topbar"><div className="breadcrumb"><Layers3 size={15} /><span>Workspace</span><ChevronRight size={12} /><strong>{view === "knowledge" ? "Knowledge Retriever" : "Task Router"}</strong></div><div className="topbar-right"><span className="online"><span className="status-dot" /> Workspace active</span><span className="demo-tag">DEMO</span><span className="text-muted-foreground" title="No new notifications"><Bell size={17} /></span><span className="avatar">AC</span></div></header>
       <main className="main-content"><div className="page-title-row"><div><p className="eyebrow"><Sparkles size={12} /> Procurement intelligence</p><h1>{view === "knowledge" ? "Knowledge Retriever" : "Task Router"}</h1><p className="page-subtitle">{view === "knowledge" ? "Keep the knowledge. Maintain the momentum." : "The right work. The right people. A seamless handover."}</p></div><div className="security-badge"><ShieldCheck size={15} /> Procurement continuity, by design</div></div>
         <section className="stats" aria-label="Workspace overview"><Stat icon={FileText} label="Indexed documents" value={String(files.length).padStart(2,"0")} note="Ready for retrieval" /><Stat icon={CheckCheck} label="Knowledge status" value="Up to date" note="All sources available" /><Stat icon={Users} label="Connected team" value="03" note="Procurement specialists" /></section>
         <div className="view-tabs" role="tablist" aria-label="Workspace views">{tabs.map(({id,label,icon:Icon}) => <Button key={id} role="tab" aria-selected={view === id} aria-controls={`${id}-panel`} id={`${id}-tab`} variant="ghost" className={`tab-button ${view === id ? "active" : ""}`} onClick={() => setView(id)}><Icon size={15} />{label}</Button>)}</div>
