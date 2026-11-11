@@ -19,7 +19,7 @@ export const allocations = [
 export function getAmcorTerms(question: string) {
   const normalized = question.toLowerCase();
   if (!normalized.includes("amcor") || !normalized.includes("discount")) return null;
-  return { discountPercent: 15, unitThreshold: 10000, accountManager: "Sarah Jenkins", source: indexedFiles[0].name };
+  return { discountPercent: 15, unitThreshold: 10000, accountManager: "Sarah Jenkins", source: "AMCOR_Paper_Supplier_Contract.pdf" };
 }
 
 export function getDemoAnswer(question: string) {
