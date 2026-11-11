@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ArrowDownToLine, ArrowRight, ArrowUp, ArrowUpRight, Bell, BookOpen, Check, CheckCheck, ChevronRight, CircleCheck, Clock3, FileSpreadsheet, FileText, GitBranch, Layers3, Loader2, LockKeyhole, Mail, MoreHorizontal, Network, ShieldCheck, Sparkles, UploadCloud, Users, Zap } from "lucide-react";
+import { ArrowDownToLine, ArrowRight, ArrowUp, ArrowUpRight, Bell, BookOpen, Check, CheckCheck, ChevronRight, CircleCheck, Clock3, FileSpreadsheet, FileText, GitBranch, Layers3, Loader2, LockKeyhole, Mail, MoreHorizontal, Network, PanelLeftClose, PanelLeftOpen, ShieldCheck, Sparkles, UploadCloud, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { allocations, getDemoAnswer, indexedFiles, team } from "@/lib/procurement-demo";
 
@@ -28,6 +28,7 @@ function Dashboard() {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [allocationState, setAllocationState] = useState<"idle" | "loading" | "done">("idle");
+  const [sidebarHidden, setSidebarHidden] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const history = useRef<HTMLDivElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -58,8 +59,9 @@ function Dashboard() {
     timers.current.push(setTimeout(() => setAllocationState("done"), 1500));
   }
   const tabs = [{ id: "knowledge" as const, label: "Knowledge Retriever", icon: BookOpen }, { id: "tasks" as const, label: "Task Router", icon: GitBranch }];
-  return <div className="app-shell">
-    <aside className="sidebar">
+  return <div className={`app-shell ${sidebarHidden ? "sidebar-hidden" : ""}`}>
+    <button type="button" className="sidebar-toggle" onClick={() => setSidebarHidden((hidden) => !hidden)} aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"} aria-expanded={!sidebarHidden}>{sidebarHidden ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}</button>
+    <aside className="sidebar" aria-hidden={sidebarHidden}>
       <div><div className="brand"><span className="brand-icon"><Network size={23} strokeWidth={1.8} /></span><span>Offboard<span className="brand-ai">.AI</span></span></div><p className="brand-subtitle">Procurement continuity engine</p></div>
       <nav aria-label="Main navigation"><p className="nav-label">WORKSPACE</p>{tabs.map(({ id, label, icon: Icon }) => <Button key={id} variant="ghost" className={`nav-button ${view === id ? "active" : ""}`} onClick={() => setView(id)} aria-current={view === id ? "page" : undefined}><Icon size={18} />{label}{view === id && <ChevronRight className="ml-auto" size={14} />}</Button>)}</nav>
       <div className="sidebar-bottom"><div className="workspace-box"><div className="flex items-center gap-2"><span className="status-dot" /><strong className="text-[11px]">Continuity workspace</strong></div><p>Your knowledge stays.<br />Your business moves forward.</p><div className="mt-3 flex items-center gap-1.5 text-[9px] text-muted-foreground"><ShieldCheck size={12} /> Private demo environment</div></div><div className="profile"><span className="avatar">AC</span><div><strong>Alex Carter</strong><p>Procurement Manager</p></div><span className="ml-auto text-muted-foreground"><MoreHorizontal size={16} /></span></div></div>
