@@ -171,6 +171,7 @@ export const askAssistant = createServerFn({ method: "POST" })
           role: "system",
           content:
             "Answer only from the excerpts. Name the source file you used. " +
+            "Reply in plain text: no markdown, no asterisks, no backticks. " +
             `Today is ${today}. Interpret relative dates such as "next 30 days" against today. ` +
             "When the question asks for a date range, list every dated item in the excerpts that falls inside it. " +
             `If the excerpts do not contain the answer, reply exactly: ${NOT_FOUND_ANSWER}. ` +
@@ -178,7 +179,7 @@ export const askAssistant = createServerFn({ method: "POST" })
         },
         { role: "user", content: `Question: ${question}\n\nExcerpts:\n${context}` },
       ],
-      400,
+      1500,
     );
 
     if (!result.ok) return { ok: false, message: result.message };
@@ -304,7 +305,7 @@ export const distributeWorkload = createServerFn({ method: "POST" }).handler(
           content:
             "Assign each task to exactly one team member, favouring expertise and available capacity. " +
             "Reply with json only: an array of objects with keys task, buyer and rationale. " +
-            "Use only the task titles and buyer names given. rationale is one short sentence, max 22 words.",
+            "Use only the task titles and buyer names given. rationale is one short sentence, max 22 words, plain text.",
         },
         {
           role: "user",
@@ -315,7 +316,7 @@ export const distributeWorkload = createServerFn({ method: "POST" }).handler(
               .join("; ")}`,
         },
       ],
-      600,
+      1500,
     );
     if (!result.ok) return { ok: false, message: result.message };
 

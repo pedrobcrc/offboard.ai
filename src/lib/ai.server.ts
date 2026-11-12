@@ -84,7 +84,7 @@ async function readStreamedText(response: Response): Promise<string> {
  * One chat-completion call. Streams even though only the final text is returned, so a
  * slow answer cannot be billed twice by a buffered retry. Only 429/5xx are retried.
  */
-export async function askGateway(messages: ChatMessage[], maxTokens = 500): Promise<GatewayResult> {
+export async function askGateway(messages: ChatMessage[], maxTokens = 1500): Promise<GatewayResult> {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) return { ok: false, message: "AI is not configured for this workspace." };
 
