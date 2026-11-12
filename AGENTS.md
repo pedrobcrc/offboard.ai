@@ -37,3 +37,4 @@ use the editor.
 - Keep Task Router presentation in its dedicated component; validate AI assignments before atomic database persistence so missing tasks or over-capacity allocations never partially save.
 - Store buyer capacity as the baseline and derive projected workloads from persisted task criticality to avoid double-counting on refresh.
 - Persist AI proposals and manager decisions separately; reassignment stays proposed until approval, and review/reset operations update tasks and the audit log atomically in the shared demo workspace.
+- Validate model allocations with the shared pure validator and allow exactly one correction call for local validation errors before atomic persistence; gateway failures remain outside this retry to preserve terminal error handling.

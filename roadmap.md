@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Correct manager override rationales while retaining the original AI buyer.
+- [x] Ground workload percentages and retry invalid AI allocations once.
+- [x] Test the fixes end-to-end and reset all tasks and decisions.
 - [x] Add proposed/approved review states, atomic decisions and a persisted decision log.
 - [x] Add review dialogs, live workload preview, metrics, bulk approval and demo reset.
 - [x] Verify manager review and reset end-to-end and test review rules.

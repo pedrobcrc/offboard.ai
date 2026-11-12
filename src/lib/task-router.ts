@@ -16,6 +16,51 @@ export function isWorkloadWarning(workload: number) { return workload > 90; }
 export function projectedWorkload(base: number, tasks: { criticality: string }[]) {
   return base + tasks.reduce((sum, task) => sum + taskLoad(task.criticality), 0);
 }
+type AllocationContext = {
+  tasks: { id: string; criticality: string }[];
+  buyers: { id: string; name: string; currentWorkload: number }[];
+  evidence: { task_id: string; chunks: { filename: string }[] }[];
+};
+export function validateAllocations(text: string, context: AllocationContext) {
+  let entries: z.infer<typeof modelAllocationSchema>;
+  try {
+    const parsed: unknown = JSON.parse(text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, ""));
+    entries = modelAllocationSchema.parse(Array.isArray(parsed) ? parsed : (parsed as { allocations?: unknown } | null)?.allocations);
+  } catch { throw new Error("The AI returned an incomplete or invalid allocation. No tasks were changed."); }
+  if (entries.length !== context.tasks.length || new Set(entries.map((entry) => entry.task_id)).size !== context.tasks.length) {
+    throw new Error(`The AI must assign all ${context.tasks.length} tasks exactly once. No tasks were changed.`);
+  }
+  const payload = entries.map((entry) => {
+    const task = context.tasks.find((task) => task.id === entry.task_id);
+    const buyer = context.buyers.find((buyer) => buyer.name === entry.assigned_buyer);
+    const chunks = context.evidence.find((item) => item.task_id === entry.task_id)?.chunks ?? [];
+    if (!task || !buyer || (chunks.length ? !chunks.some((chunk) => chunk.filename === entry.source_file) : entry.source_file !== null)) {
+      throw new Error("The AI returned an unknown buyer, task or source. No tasks were changed.");
+    }
+    return { task_id: task.id, buyer_id: buyer.id, rationale: entry.rationale, confidence: entry.confidence, source_file: entry.source_file };
+  });
+  for (const buyer of context.buyers) {
+    const newTasks = context.tasks.filter((task) => payload.some((entry) => entry.task_id === task.id && entry.buyer_id === buyer.id));
+    if (projectedWorkload(buyer.currentWorkload, newTasks) > 100) {
+      throw new Error(`The AI exceeded 100% workload for ${buyer.name}. No tasks were changed.`);
+    }
+  }
+  return { entries, payload };
+}
+/** Only successful model responses that fail local validation receive one correction attempt. */
+export async function allocateWithRetry(
+  callModel: (validationError?: string) => Promise<{ ok: true; text: string } | { ok: false; message: string }>,
+  context: AllocationContext,
+) {
+  let validationError: string | undefined;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const result = await callModel(validationError);
+    if (!result.ok) return result;
+    try { return { ok: true as const, ...validateAllocations(result.text, context) }; }
+    catch (error) { validationError = error instanceof Error ? error.message : "Invalid allocation."; }
+  }
+  return { ok: false as const, message: validationError ?? "Invalid allocation." };
+}
 export const reviewSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("approve"), taskId: z.string().uuid() }),
   z.object({ action: z.literal("reassign"), taskId: z.string().uuid(), buyerId: z.string().uuid(), reason: z.string().trim().min(10) }),

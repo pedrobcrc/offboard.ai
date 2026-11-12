@@ -50,6 +50,13 @@
       "when": 1794445757069,
       "tag": "0006_fix_scoped_demo_reset",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794446096847,
+      "tag": "0007_manager_override_rationale",
+      "breakpoints": true
     }
   ]
 }
