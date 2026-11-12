@@ -1,26 +1,29 @@
-# offboard ai
+# Offboard.AI — Procurement Continuity Engine
 
-Implement exactly the screenshot and nothing else
+Offboard.AI is an MVP built for the IE University course "Artificial Intelligence for Decision Making" (Prof. Danilo Messinese). It helps a procurement team handle the departure of a Senior Buyer: a Knowledge Retriever makes the departing buyer's files searchable and answers questions with cited sources using retrieval-augmented generation, while a Task Router proposes who should take each open task based on expertise, workload and supplier criticality. AI proposes; a manager approves, reassigns with a required reason, or rejects, and every decision is logged.
 
-This project was built with [Lovable](https://lovable.dev).
+**Live app:** https://offboard-ai.lovable.app
 
-**Live app**: https://snapshot-to-page-parade.lovable.app
+## How it works
 
-## Build with Lovable
+- Retrieval uses full-text search over document chunks to find relevant evidence.
+- Gemini 2.5 Flash via Lovable AI generates cited answers and task allocation proposals.
+- Task allocations are validated against workload limits, with one automatic retry if validation fails.
+- Manager review records decisions in a decision log and tracks the override rate.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/120fba89-c96f-4474-9a25-2e43820c60b0).
+## Demo data
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+A fictional case of Laura Martín, a departing Senior Buyer, with six seeded documents and seven open tasks; Reset demo restores this state.
 
-## Development
+## Team
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Emma Minaudo, Phil Minvielle, Anna Muller, Maria Vittoria Munzone, Pedro Ribeiro da Cunha, Lily Winter.
+
+## Built with Lovable
+
+Built with [Lovable](https://lovable.dev). To run locally with Node.js and npm:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
 npm i
 npm run dev
 ```
