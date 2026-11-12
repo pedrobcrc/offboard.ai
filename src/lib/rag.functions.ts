@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { buyerEditSchema, modelAllocationSchema, projectedWorkload, type Criticality } from "@/lib/task-router";
+import { buyerEditSchema, modelAllocationSchema, projectedWorkload, reviewSchema, type Criticality } from "@/lib/task-router";
 import { NOT_FOUND_ANSWER } from "@/lib/procurement-demo";
 
 /** Files the upload flow can read: plain text formats plus PDF (text extracted in the browser). */
@@ -40,12 +40,14 @@ export type TaskRow = {
   assignedInitials: string | null;
   assignedTone: string | null;
   rationale: string | null;
+  aiProposedBuyer: string | null;
 };
 
 export type Workspace = {
   documents: DocumentRow[];
   team: TeamRow[];
   tasks: TaskRow[];
+  decisions: Database["public"]["Tables"]["task_decisions"]["Row"][];
   departingBuyer: { name: string; role: string; departingOn: string } | null;
 };
 
@@ -83,7 +85,7 @@ function normalizeApostrophes(text: string) {
 /** Documents, team, tasks and the departing buyer — the demo's default state. */
 export const getWorkspace = createServerFn({ method: "GET" }).handler(async (): Promise<Workspace> => {
   const supabase = publicClient();
-  const [documents, team, tasks, info] = await Promise.all([
+  const [documents, team, tasks, info, decisions] = await Promise.all([
     supabase
       .from("documents")
       .select("id, filename, kind, size_label, detail")
@@ -94,19 +96,21 @@ export const getWorkspace = createServerFn({ method: "GET" }).handler(async (): 
       .order("position", { ascending: true }),
     supabase
       .from("tasks")
-      .select("id, title, status, supplier, due_date, criticality, confidence, source_file, assigned_member_id, assigned_buyer, assigned_initials, assigned_tone, rationale")
+      .select("id, title, status, supplier, due_date, criticality, confidence, source_file, assigned_member_id, assigned_buyer, assigned_initials, assigned_tone, rationale, ai_proposed_buyer")
       .order("position", { ascending: true }),
     supabase
       .from("workspace_info")
       .select("departing_buyer_name, departing_buyer_role, departing_on")
       .eq("id", 1)
       .maybeSingle(),
+    supabase.from("task_decisions").select("*").order("created_at", { ascending: false }),
   ]);
 
-  const firstError = documents.error || team.error || tasks.error || info.error;
+  const firstError = documents.error || team.error || tasks.error || info.error || decisions.error;
   if (firstError) throw new Error(firstError.message);
 
   return {
+    decisions: decisions.data ?? [],
     documents: (documents.data ?? []).map((row) => ({
       id: row.id,
       filename: row.filename,
@@ -133,6 +137,7 @@ export const getWorkspace = createServerFn({ method: "GET" }).handler(async (): 
       assignedInitials: row.assigned_initials,
       assignedTone: row.assigned_tone,
       rationale: row.rationale,
+      aiProposedBuyer: row.ai_proposed_buyer,
     })),
     departingBuyer: info.data
       ? {
@@ -268,7 +273,7 @@ export const updateBuyer = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => buyerEditSchema.parse(input))
   .handler(async ({ data }) => {
     const supabase = publicClient();
-    const { data: tasks, error: taskError } = await supabase.from("tasks").select("criticality").eq("status", "assigned").eq("assigned_member_id", data.id);
+    const { data: tasks, error: taskError } = await supabase.from("tasks").select("criticality").in("status", ["proposed", "approved"]).eq("assigned_member_id", data.id);
     if (taskError) return { ok: false as const, message: taskError.message };
     if (projectedWorkload(data.capacity, tasks ?? []) > 100) return { ok: false as const, message: "Current assignments would push this buyer above 100%." };
     const { error } = await supabase.from("team_members").update({ name: data.name, expertise: data.expertise, capacity: data.capacity, workload: `${data.capacity}%`, initials: data.name.split(/\s+/).map((word) => word[0]).join("").slice(0,2).toUpperCase() }).eq("id", data.id);
@@ -298,7 +303,7 @@ export const distributeWorkload = createServerFn({ method: "POST" }).handler(asy
   const team = teamResult.data ?? [];
   if (!tasks.length) return { ok: true, allocations: [] };
   if (!team.length) return { ok: false, message: "No buyers are available." };
-  const currentLoads = new Map(team.map((member) => [member.id, projectedWorkload(member.capacity, allTasks.filter((task) => task.status === "assigned" && task.assigned_member_id === member.id))]));
+  const currentLoads = new Map(team.map((member) => [member.id, projectedWorkload(member.capacity, allTasks.filter((task) => ["proposed", "approved"].includes(task.status) && task.assigned_member_id === member.id))]));
   const evidence = await Promise.all(tasks.map(async (task) => {
     const { data: chunks, error } = await supabase.rpc("search_chunks", { p_question: task.supplier, p_limit: 4 });
     if (error) throw new Error(error.message);
@@ -330,4 +335,21 @@ export const distributeWorkload = createServerFn({ method: "POST" }).handler(asy
   const { error } = await supabase.rpc("apply_task_allocations", { p_allocations: payload });
   if (error) return { ok: false, message: error.message };
   return { ok: true, allocations: entries.map((entry) => ({ task: tasks.find((task) => task.id === entry.task_id)?.title ?? "", buyer: entry.assigned_buyer })) };
+});
+
+export const reviewTask = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => reviewSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { error } = await publicClient().rpc("review_task", { p_task_id: data.taskId, p_action: data.action,
+      p_buyer_id: data.action === "reassign" ? data.buyerId : undefined,
+      p_reason: data.action === "approve" ? "" : data.reason });
+    return error ? { ok: false as const, message: error.message } : { ok: true as const };
+  });
+export const approveRemaining = createServerFn({ method: "POST" }).handler(async () => {
+  const { error } = await publicClient().rpc("approve_remaining_tasks");
+  return error ? { ok: false as const, message: error.message } : { ok: true as const };
+});
+export const resetTaskDemo = createServerFn({ method: "POST" }).handler(async () => {
+  const { error } = await publicClient().rpc("reset_task_demo");
+  return error ? { ok: false as const, message: error.message } : { ok: true as const };
 });

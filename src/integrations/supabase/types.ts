@@ -76,8 +76,45 @@ export type Database = {
         }
         Relationships: []
       }
+      task_decisions: {
+        Row: {
+          action: string
+          ai_proposal: string
+          created_at: string
+          final_decision: string
+          id: string
+          proposal_id: string
+          reason: string
+          task_id: string
+          task_title: string
+        }
+        Insert: {
+          action: string
+          ai_proposal: string
+          created_at?: string
+          final_decision: string
+          id?: string
+          proposal_id: string
+          reason: string
+          task_id: string
+          task_title: string
+        }
+        Update: {
+          action?: string
+          ai_proposal?: string
+          created_at?: string
+          final_decision?: string
+          id?: string
+          proposal_id?: string
+          reason?: string
+          task_id?: string
+          task_title?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
+          ai_proposed_buyer: string | null
           assigned_at: string | null
           assigned_buyer: string | null
           assigned_initials: string | null
@@ -87,7 +124,9 @@ export type Database = {
           criticality: string
           due_date: string | null
           id: string
+          overridden: boolean
           position: number
+          proposal_id: string | null
           rationale: string | null
           source_file: string | null
           status: string
@@ -95,6 +134,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          ai_proposed_buyer?: string | null
           assigned_at?: string | null
           assigned_buyer?: string | null
           assigned_initials?: string | null
@@ -104,7 +144,9 @@ export type Database = {
           criticality?: string
           due_date?: string | null
           id?: string
+          overridden?: boolean
           position?: number
+          proposal_id?: string | null
           rationale?: string | null
           source_file?: string | null
           status?: string
@@ -112,6 +154,7 @@ export type Database = {
           title: string
         }
         Update: {
+          ai_proposed_buyer?: string | null
           assigned_at?: string | null
           assigned_buyer?: string | null
           assigned_initials?: string | null
@@ -121,7 +164,9 @@ export type Database = {
           criticality?: string
           due_date?: string | null
           id?: string
+          overridden?: boolean
           position?: number
+          proposal_id?: string | null
           rationale?: string | null
           source_file?: string | null
           status?: string
@@ -193,6 +238,7 @@ export type Database = {
         Args: { p_allocations: Json }
         Returns: undefined
       }
+      approve_remaining_tasks: { Args: never; Returns: undefined }
       chunk_document_text: {
         Args: { p_content: string; p_target?: number }
         Returns: {
@@ -201,6 +247,16 @@ export type Database = {
         }[]
       }
       index_document: { Args: { p_document_id: string }; Returns: number }
+      reset_task_demo: { Args: never; Returns: undefined }
+      review_task: {
+        Args: {
+          p_action: string
+          p_buyer_id?: string
+          p_reason?: string
+          p_task_id: string
+        }
+        Returns: undefined
+      }
       search_chunks: {
         Args: { p_limit?: number; p_question: string }
         Returns: {

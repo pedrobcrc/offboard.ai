@@ -36,6 +36,13 @@
       "when": 1794444879787,
       "tag": "0004_task_router_evidence_and_buyer_editing",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794445579965,
+      "tag": "0005_manager_review_and_decision_log",
+      "breakpoints": true
     }
   ]
 }
