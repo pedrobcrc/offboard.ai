@@ -31,5 +31,6 @@ use the editor.
 
 ## Application architecture
 - Keep both procurement tabs in one dashboard at `/`; they are two views of one continuous workspace.
-- Keep simulated contract terms and task allocations in a browser-safe demo module; no uploaded documents are actually parsed or persisted.
+- Keep procurement documents, their searchable chunks, team, tasks and workspace info in the database; the browser-safe demo module holds only suggested questions, cached demo-mode answers and file-type rules.
+- Run retrieval and model calls inside server functions only; the browser reads documents through those functions and never talks to the model directly.
 - Define application visual treatments in the global design system and use the shared Button for interactive actions.

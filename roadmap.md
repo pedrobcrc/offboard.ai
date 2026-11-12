@@ -2,3 +2,8 @@
 - [x] Build the Knowledge Retriever with demo files, upload interaction, and simulated chat.
 - [x] Build Task Router with team capacity and simulated task allocation.
 - [x] Verify the requested interactions and desktop/mobile presentation.
+- [x] Move demo data into the database: six seeded documents, Laura Martín's team, tasks and workspace info.
+- [x] Wire real retrieval and grounded answers with clickable source chips.
+- [x] Make uploads work for .txt, .md, .eml, .csv and .pdf.
+- [x] Add the header Demo mode toggle with clearly labelled cached answers, off by default.
+- [x] Verify answers, uploads, PDF extraction and AI workload distribution in the running app.
