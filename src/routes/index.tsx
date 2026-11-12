@@ -4,9 +4,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowRight, ArrowUp, ArrowUpRight, Bell, BookOpen, CheckCheck, ChevronRight, CircleCheck, Clock3, FileSpreadsheet, FileText, GitBranch, Layers3, Loader2, LockKeyhole, Mail, MoreHorizontal, Network, ShieldCheck, Sparkles, UploadCloud, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TaskRouter } from "@/components/task-router";
 import { Switch } from "@/components/ui/switch";
-import { askAssistant, distributeWorkload, getWorkspace, uploadDocument } from "@/lib/rag.functions";
-import { CACHED_ALLOCATIONS, CACHED_ANSWERS, CACHED_LABEL, SUGGESTED_QUESTIONS, fileExtension, formatFileSize, isAcceptedFilename } from "@/lib/procurement-demo";
+import { askAssistant, getWorkspace, uploadDocument } from "@/lib/rag.functions";
+import { CACHED_ANSWERS, CACHED_LABEL, SUGGESTED_QUESTIONS, fileExtension, formatFileSize, isAcceptedFilename } from "@/lib/procurement-demo";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -48,9 +49,6 @@ function Dashboard() {
   const [uploadError, setUploadError] = useState("");
   const [demoMode, setDemoMode] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [allocationState, setAllocationState] = useState<"idle" | "loading" | "done">("idle");
-  const [cachedAllocation, setCachedAllocation] = useState<typeof CACHED_ALLOCATIONS | null>(null);
-  const [allocationError, setAllocationError] = useState("");
   const [sidebarPeeking, setSidebarPeeking] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const history = useRef<HTMLDivElement>(null);
@@ -58,7 +56,6 @@ function Dashboard() {
 
   const askFn = useServerFn(askAssistant);
   const uploadFn = useServerFn(uploadDocument);
-  const distributeFn = useServerFn(distributeWorkload);
 
   useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
   function peek(on: boolean) {
@@ -112,35 +109,7 @@ function Dashboard() {
     if (fileInput.current) fileInput.current.value = "";
   }
 
-  async function distribute() {
-    setAllocationError("");
-    setCachedAllocation(null);
-    setAllocationState("loading");
-    const result = await distributeFn();
-    if (result.ok && result.allocations.length) {
-      setAllocationState("done");
-      await queryClient.invalidateQueries({ queryKey: ["workspace"] });
-    } else if (demoMode) {
-      setCachedAllocation(CACHED_ALLOCATIONS);
-      setAllocationState("done");
-    } else {
-      setAllocationState("idle");
-      setAllocationError(result.ok ? "No pending tasks are left to assign." : result.message);
-    }
-  }
-
   const tabs = [{ id: "knowledge" as const, label: "Knowledge Retriever", icon: BookOpen }, { id: "tasks" as const, label: "Task Router", icon: GitBranch }];
-  const pending = workspace.tasks.filter((task) => task.status !== "assigned");
-  const assigned = workspace.tasks.filter((task) => task.status === "assigned");
-  const allocationRows = cachedAllocation
-    ? cachedAllocation.map((row) => ({ ...row }))
-    : assigned.map((task) => ({ task: task.title, buyer: task.assignedBuyer ?? "", initials: task.assignedInitials ?? "", tone: task.assignedTone ?? "blue", rationale: task.rationale ?? "" }));
-  const hasAllocation = allocationRows.length > 0;
-  const departingIn = workspace.departingBuyer
-    ? Math.max(0, Math.round((new Date(`${workspace.departingBuyer.departingOn}T00:00:00Z`).getTime() - Date.now()) / 604800000))
-    : 0;
-  const departingLabel = departingIn > 0 ? `leaving in ${departingIn} week${departingIn === 1 ? "" : "s"}` : "leaving this week";
-
   return <div className="app-shell">
     <div className="sidebar-hover-zone" aria-hidden="true" onMouseEnter={() => peek(true)} />
     <aside className={`sidebar ${sidebarPeeking ? "peeking" : ""}`} onMouseLeave={() => peek(false)} onFocusCapture={() => peek(true)} onKeyDown={(event) => { if (event.key === "Escape") peek(false); }}>
@@ -155,7 +124,7 @@ function Dashboard() {
         {view === "knowledge" ? <section className="retriever-grid fade-in" role="tabpanel" id="knowledge-panel" aria-labelledby="knowledge-tab">
           <div className="panel"><PanelHead icon={FileText} title="Knowledge sources" subtitle="Your procurement source of truth" badge={String(workspace.documents.length)} /><div className="ingestion-body"><div className={`drop-zone ${dragging ? "dragging" : ""}`} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); upload(event.dataTransfer.files); }}><div className="upload-icon">{uploading ? <Loader2 className="animate-spin" size={22} /> : <UploadCloud size={23} strokeWidth={1.6} />}</div><h3>{uploading ? "Adding your documents…" : "Drop your documents here"}</h3><p>Keep every detail within reach.</p><Button variant="outline" size="sm" className="text-[10px]" disabled={uploading} onClick={() => fileInput.current?.click()}><ArrowUpRight size={12} />Browse files</Button><input ref={fileInput} type="file" multiple accept=".txt,.md,.eml,.csv,.pdf" hidden onChange={(event) => upload(event.target.files)} /><p className="file-types">PDF, EML, TXT, MD & CSV</p></div>{uploadError && <p className="ingestion-error">{uploadError}</p>}<div className="indexed-heading"><span>Successfully Indexed Files</span><span className="count-badge">{workspace.documents.length} files</span></div><div>{workspace.documents.map((file) => <div className="file-row fade-in" key={file.id}><span className={`file-icon ${file.kind.toLowerCase()}`}>{file.kind === "EML" ? <Mail size={17} /> : file.kind === "XLSX" ? <FileSpreadsheet size={17} /> : <FileText size={17} />}</span><div className="file-info"><strong>{file.filename}</strong><p>{file.sizeLabel} <span className="mx-1">·</span> {file.detail}</p></div><CircleCheck className="file-check" size={14} /></div>)}</div></div><div className="ingestion-note"><LockKeyhole size={12} /> Documents are stored and searched in your workspace</div></div>
           <div className="panel chat-panel"><PanelHead icon={Sparkles} title="Procurement assistant" subtitle="Answers grounded in your documents" badge={<span className="flex items-center gap-1.5 text-success"><span className="status-dot" /> Ready</span>} /><div ref={history} className="chat-history" aria-live="polite"><div className="chat-welcome"><span className="ai-avatar"><Sparkles size={17} /></span><div className="min-w-0 flex-1"><div className="chat-name">Offboard AI <span>Knowledge assistant</span></div><div className="welcome-message"><p>A smooth handover starts with the right knowledge.</p><p>Your procurement documents are ready. What would you like to know about your suppliers, contracts, or spend?</p></div></div></div>{messages.length === 0 && <div className="suggestions"><p className="small-label">A good place to start</p>{SUGGESTED_QUESTIONS.map((question) => <Button key={question} variant="outline" className="suggestion-button" onClick={() => ask(question)}>{question}<ArrowUpRight size={13} /></Button>)}</div>}{messages.map((message, index) => <div key={index} className={`chat-message fade-in ${message.role}`}>{message.role === "assistant" ? <><span className="ai-avatar"><Sparkles size={17} /></span><div className="min-w-0"><div className="chat-name">Offboard AI{message.cached && <span className="cached-tag">{CACHED_LABEL}</span>}</div><div className={`welcome-message ${message.failed ? "answer-failed" : ""}`}>{message.text}{message.sources && message.sources.length > 0 && <div className="source-chips">{message.sources.map((source) => { const key = `${index}:${source.filename}`; const open = expanded === key; return <span key={source.filename} className="source-chip-wrap"><Button type="button" variant="outline" size="sm" className={`source-chip ${open ? "open" : ""}`} disabled={!source.excerpt} onClick={() => setExpanded(open ? null : key)}><FileText size={11} />{source.filename}</Button>{open && source.excerpt && <span className="source-excerpt">{source.excerpt}</span>}</span>; })}</div>}</div></div></> : <div className="user-bubble">{message.text}</div>}</div>)}{thinking && <div className="chat-message"><span className="ai-avatar"><Sparkles size={17} /></span><div className="flex items-center gap-2 text-[11px] text-muted-foreground"><Loader2 size={14} className="animate-spin" />Retrieving contract details…</div></div>}</div><div className="chat-composer"><form className="composer-form" onSubmit={(event: FormEvent) => { event.preventDefault(); ask(input); }}><input aria-label="Ask your procurement assistant" value={input} onChange={(event) => setInput(event.target.value)} placeholder="Ask about your procurement knowledge…" disabled={thinking} /><Button type="submit" size="icon" aria-label="Send message" disabled={!input.trim() || thinking} className="h-8 w-8">{thinking ? <Loader2 className="animate-spin" /> : <ArrowUp size={16} />}</Button></form><div className="composer-note"><span className="flex items-center gap-1"><ShieldCheck size={10} /> Answers cite the file they came from</span><span>Powered by Offboard.AI</span></div></div></div>
-        </section> : <section className="fade-in" role="tabpanel" id="tasks-panel" aria-labelledby="tasks-tab"><div className="task-grid"><div className="panel"><PanelHead icon={BookOpen} title="Departing Buyer's Pending Tasks" subtitle={workspace.departingBuyer ? `${workspace.departingBuyer.name} · ${workspace.departingBuyer.role} · ${departingLabel}` : "Open priorities for a seamless transition"} badge={`${pending.length} tasks`} /><div className="task-body">{pending.length ? pending.map((task, index) => <div className="pending-task" key={task.id}><span className="task-number">0{index + 1}</span><span>{task.title}</span><Clock3 size={14} className="ml-auto shrink-0 text-muted-foreground" /></div>) : <div className="pending-task"><span className="task-number">✓</span><span>Every pending task has an owner.</span></div>}</div></div><div className="panel"><PanelHead icon={Users} title="Remaining Team Capacity" subtitle="Expertise and current workload" badge={`${workspace.team.length} buyers`} /><div className="task-body">{workspace.team.map((person) => <div className="team-row" key={person.id}><div className="team-info"><span className={`avatar ${person.tone}`}>{person.initials}</span><div><strong>{person.name}</strong><p>{person.expertise}</p></div><span className={`workload ${person.tone}`}>{person.workload} Workload</span></div><div className="capacity-track" role="progressbar" aria-label={`${person.name}'s workload`} aria-valuenow={person.capacity} aria-valuemin={0} aria-valuemax={100}><span className={`capacity-fill ${person.tone}`} style={{ width: `${person.capacity}%` }} /></div></div>)}</div></div></div><div className="allocation-action"><p><ShieldCheck size={13} /> Expertise-led decisions. Capacity-aware assignments.</p><Button onClick={distribute} disabled={allocationState === "loading"}>{allocationState === "loading" ? <Loader2 className="animate-spin" /> : <Sparkles size={16} />}{allocationState === "loading" ? "Matching tasks to your team…" : "Distribute Workload via AI"}{allocationState !== "loading" && <ArrowRight size={15} />}</Button></div>{allocationError && <p className="ingestion-error">{allocationError}</p>}<div className="panel" aria-live="polite"><PanelHead icon={GitBranch} title="Workload allocation" subtitle="A clear owner for every next step" badge={hasAllocation ? <span className="text-success">{allocationRows.length} tasks assigned</span> : "Awaiting allocation"} />{hasAllocation ? <div className="table-wrap fade-in"><table><thead><tr><th>Pending task</th><th>Assigned buyer</th><th>Allocation rationale</th></tr></thead><tbody>{allocationRows.map((row) => <tr key={row.task}><td>{row.task}</td><td><span className="assignee"><span className={`avatar ${row.tone}`}>{row.initials}</span>{row.buyer}</span></td><td>{row.rationale}</td></tr>)}</tbody></table></div> : <div className="allocation-empty"><div className="upload-icon"><GitBranch size={21} /></div><h3>Ready for the next chapter</h3><p>Your team's next assignments will appear here.</p></div>}</div></section>}
+        </section> : <TaskRouter workspace={workspace} />}
         <footer className="footer"><span><ShieldCheck size={12} /> Built for continuity. Designed for confidence.</span><span>Offboard.AI <span className="mx-1">·</span> Procurement Continuity Engine</span></footer>
       </main></div>
   </div>;

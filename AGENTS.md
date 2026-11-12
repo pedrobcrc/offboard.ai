@@ -34,3 +34,5 @@ use the editor.
 - Keep procurement documents, their searchable chunks, team, tasks and workspace info in the database; the browser-safe demo module holds only suggested questions, cached demo-mode answers and file-type rules.
 - Run retrieval and model calls inside server functions only; the browser reads documents through those functions and never talks to the model directly.
 - Define application visual treatments in the global design system and use the shared Button for interactive actions.
+- Keep Task Router presentation in its dedicated component; validate AI assignments before atomic database persistence so missing tasks or over-capacity allocations never partially save.
+- Store buyer capacity as the baseline and derive projected workloads from persisted task criticality to avoid double-counting on refresh.

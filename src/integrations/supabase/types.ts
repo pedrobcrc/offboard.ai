@@ -81,33 +81,51 @@ export type Database = {
           assigned_at: string | null
           assigned_buyer: string | null
           assigned_initials: string | null
+          assigned_member_id: string | null
           assigned_tone: string | null
+          confidence: string | null
+          criticality: string
+          due_date: string | null
           id: string
           position: number
           rationale: string | null
+          source_file: string | null
           status: string
+          supplier: string
           title: string
         }
         Insert: {
           assigned_at?: string | null
           assigned_buyer?: string | null
           assigned_initials?: string | null
+          assigned_member_id?: string | null
           assigned_tone?: string | null
+          confidence?: string | null
+          criticality?: string
+          due_date?: string | null
           id?: string
           position?: number
           rationale?: string | null
+          source_file?: string | null
           status?: string
+          supplier?: string
           title: string
         }
         Update: {
           assigned_at?: string | null
           assigned_buyer?: string | null
           assigned_initials?: string | null
+          assigned_member_id?: string | null
           assigned_tone?: string | null
+          confidence?: string | null
+          criticality?: string
+          due_date?: string | null
           id?: string
           position?: number
           rationale?: string | null
+          source_file?: string | null
           status?: string
+          supplier?: string
           title?: string
         }
         Relationships: []
@@ -171,6 +189,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_task_allocations: {
+        Args: { p_allocations: Json }
+        Returns: undefined
+      }
       chunk_document_text: {
         Args: { p_content: string; p_target?: number }
         Returns: {

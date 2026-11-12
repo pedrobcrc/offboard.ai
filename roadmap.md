@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Replace buyers and tasks with editable buyers and seven supplier priorities.
+- [x] Add evidence-grounded AI allocation, confidence, source panel and projected workloads.
+- [x] Test workload rules and verify editing and allocation in the dashboard.
 - [x] Build the Knowledge Retriever with demo files, upload interaction, and simulated chat.
 - [x] Build Task Router with team capacity and simulated task allocation.
 - [x] Verify the requested interactions and desktop/mobile presentation.
