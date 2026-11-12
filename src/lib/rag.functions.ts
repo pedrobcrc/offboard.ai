@@ -341,7 +341,7 @@ export const reviewTask = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => reviewSchema.parse(input))
   .handler(async ({ data }) => {
     const { error } = await publicClient().rpc("review_task", { p_task_id: data.taskId, p_action: data.action,
-      p_buyer_id: data.action === "reassign" ? data.buyerId : undefined,
+      ...(data.action === "reassign" ? { p_buyer_id: data.buyerId } : {}),
       p_reason: data.action === "approve" ? "" : data.reason });
     return error ? { ok: false as const, message: error.message } : { ok: true as const };
   });

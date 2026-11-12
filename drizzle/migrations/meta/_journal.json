@@ -43,6 +43,13 @@
       "when": 1794445579965,
       "tag": "0005_manager_review_and_decision_log",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794445757069,
+      "tag": "0006_fix_scoped_demo_reset",
+      "breakpoints": true
     }
   ]
 }
