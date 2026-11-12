@@ -37,5 +37,6 @@ use the editor.
 - Keep Task Router presentation in its dedicated component; validate AI assignments before atomic database persistence so missing tasks or over-capacity allocations never partially save.
 - Store buyer capacity as the baseline and derive projected workloads from persisted task criticality to avoid double-counting on refresh.
 - Persist AI proposals and manager decisions separately; reassignment stays proposed until approval, and review/reset operations update tasks and the audit log atomically in the shared demo workspace.
+- Reset visitor uploads inside the atomic database reset using the upload detail marker, a seeded-filename exclusion and scoped DELETE policy; cascading foreign keys remove their search chunks while protecting seeded evidence.
 - Validate model allocations with the shared pure validator and allow exactly one correction call for local validation errors before atomic persistence; gateway failures remain outside this retry to preserve terminal error handling.
 - Keep answer-source filtering in a browser-safe presentation helper; retain all retrieved evidence on the server and fetch fresh workspace data into the query cache after manager decisions so review rows update immediately.

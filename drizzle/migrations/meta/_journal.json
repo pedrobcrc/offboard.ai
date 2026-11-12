@@ -57,6 +57,13 @@
       "when": 1794446096847,
       "tag": "0007_manager_override_rationale",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794447595009,
+      "tag": "0008_reset_uploaded_documents",
+      "breakpoints": true
     }
   ]
 }
