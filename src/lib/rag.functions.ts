@@ -1,13 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { NOT_FOUND_ANSWER } from "@/lib/procurement-demo";
 
 /** Files the upload flow can read: plain text formats plus PDF (text extracted in the browser). */
 export const ALLOWED_EXTENSIONS = ["txt", "md", "eml", "csv", "pdf"] as const;
 const MAX_CONTENT_CHARS = 200_000;
-
-/** The exact wording required when the retrieved chunks do not contain the answer. */
-export const NOT_FOUND_ANSWER = "I couldn't find this in the departing buyer's files";
 
 export type DocumentRow = {
   id: string;
@@ -165,6 +163,7 @@ export const askAssistant = createServerFn({ method: "POST" })
       .map((chunk, index) => `[${index + 1}] ${chunk.filename}\n${chunk.content}`)
       .join("\n\n");
 
+    const today = new Date().toISOString().slice(0, 10);
     const { askGateway } = await import("./ai.server");
     const result = await askGateway(
       [
@@ -172,6 +171,8 @@ export const askAssistant = createServerFn({ method: "POST" })
           role: "system",
           content:
             "Answer only from the excerpts. Name the source file you used. " +
+            `Today is ${today}. Interpret relative dates such as "next 30 days" against today. ` +
+            "When the question asks for a date range, list every dated item in the excerpts that falls inside it. " +
             `If the excerpts do not contain the answer, reply exactly: ${NOT_FOUND_ANSWER}. ` +
             "Max 90 words.",
         },

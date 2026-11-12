@@ -2,7 +2,6 @@
 // it reads LOVABLE_API_KEY from the server environment.
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const GATEWAY_MODELS_URL = "https://ai.gateway.lovable.dev/v1/models";
 const RUN_ID_HEADER = "X-Lovable-AIG-Run-ID";
 
 /** The user asked for this exact model; it is listed in the workspace catalogue. */
@@ -131,19 +130,4 @@ export async function askGateway(messages: ChatMessage[], maxTokens = 500): Prom
     }
   }
   return { ok: false, message: "Could not reach the AI service." };
-}
-
-/** Whether the workspace can still pay for AI calls — used to warn before a request. */
-export async function checkAiAvailability(): Promise<{ ok: true } | { ok: false; message: string }> {
-  const apiKey = process.env["LOVABLE_API_KEY"];
-  if (!apiKey) return { ok: false, message: "AI is not configured for this workspace." };
-  try {
-    const response = await fetch(GATEWAY_MODELS_URL, {
-      headers: { authorization: `Bearer ${apiKey}` },
-    });
-    if (response.ok) return { ok: true };
-    return { ok: false, message: (await safeMessage(response)) || `AI is unavailable (${response.status}).` };
-  } catch {
-    return { ok: false, message: "Could not reach the AI service." };
-  }
 }

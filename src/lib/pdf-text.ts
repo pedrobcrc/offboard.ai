@@ -19,7 +19,7 @@ export async function extractPdfText(file: File): Promise<string> {
         .replace(/[ \t]+/g, " "),
     );
   }
-  await document.destroy();
+  await document.cleanup();
   return pages
     .join("\n\n")
     .replace(/\n{3,}/g, "\n\n")
