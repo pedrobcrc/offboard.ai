@@ -1,4 +1,7 @@
 # Roadmap
+- [ ] Add proposed/approved review states, atomic decisions and a persisted decision log.
+- [ ] Add review dialogs, live workload preview, metrics, bulk approval and demo reset.
+- [ ] Verify manager review and reset end-to-end and test review rules.
 - [x] Replace buyers and tasks with editable buyers and seven supplier priorities.
 - [x] Add evidence-grounded AI allocation, confidence, source panel and projected workloads.
 - [x] Test workload rules and verify editing and allocation in the dashboard.
