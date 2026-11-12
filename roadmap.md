@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Fit allocation columns at desktop widths and combine review status/actions.
+- [x] Refresh workspace after decisions and filter answer source chips.
+- [x] Verify presentation and decision updates, then reset the demo.
 - [x] Correct manager override rationales while retaining the original AI buyer.
 - [x] Ground workload percentages and retry invalid AI allocations once.
 - [x] Test the fixes end-to-end and reset all tasks and decisions.

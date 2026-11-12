@@ -176,12 +176,19 @@ td {padding:19px 22px; border-top:1px solid var(--border); line-height:1.8;} td:
 .priority-medium {background:var(--accent); color:var(--primary);}
 .priority-low {background:var(--success-soft); color:var(--success);}
 .buyer-detail {min-width:0; flex:1;} .team-info .workload {white-space:nowrap; margin-left:0;}
-.allocation-table {min-width:1080px; table-layout:fixed;}
-.allocation-table th,.allocation-table td {padding:15px 14px;}
-.allocation-table th:first-child {width:23%;} .allocation-table th:nth-child(2) {width:9%;}
-.allocation-table th:nth-child(3) {width:13%;} .allocation-table th:nth-child(4) {width:23%;}
-.allocation-table th:nth-child(5) {width:9%;} .allocation-table th:last-child {width:23%;}
-.allocation-table td:first-child {white-space:normal;} .allocation-table .source-chip {white-space:normal; overflow-wrap:anywhere; text-align:left;}
+.allocation-table {width:100%; min-width:0; table-layout:fixed;}
+.allocation-table th,.allocation-table td {padding:15px 8px; white-space:normal; overflow-wrap:anywhere; vertical-align:top;}
+.allocation-table th:first-child {width:22%;} .allocation-table th:nth-child(2) {width:8%;}
+.allocation-table th:nth-child(3) {width:10%;} .allocation-table th:nth-child(4) {width:32%;}
+.allocation-table th:nth-child(5) {width:8%;} .allocation-table th:nth-child(6) {width:12%;}
+.allocation-table th:last-child {width:8%;}
+.allocation-table .source-chip {display:flex; width:100%; min-width:0; text-align:left;}
+.allocation-table .source-chip svg {flex-shrink:0;}
+.allocation-table .source-chip span {min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.allocation-table .assignee {display:grid; grid-template-columns:27px minmax(0,1fr); min-width:0; gap:6px;}
+.allocation-table .review-actions {display:grid; grid-template-columns:repeat(3,24px); gap:1px; margin-top:8px;}
+.allocation-table .review-actions button {width:24px; height:24px; padding:0;}
+@media(max-width:1023px) {.allocation-table {min-width:1080px;}}
 .router-sheet {width:min(100%,480px); max-width:480px; overflow-y:auto; background:var(--card);}
 .router-sheet h2 {padding-right:24px; overflow-wrap:anywhere;}
 .buyer-form {display:grid; gap:20px; margin-top:24px;}
@@ -194,11 +201,6 @@ td {padding:19px 22px; border-top:1px solid var(--border); line-height:1.8;} td:
 .review-metrics strong {color:var(--foreground); margin-left:5px;} .review-metrics small {display:block; margin-top:4px; font-size:9px;}
 .review-metrics button {margin-left:auto;}
 .review-status {display:inline-block; border-radius:4px; padding:4px 6px; font-size:9px; line-height:1.6;}
-.allocation-table {min-width:1550px;}
-.allocation-table th:first-child {width:19%;} .allocation-table th:nth-child(2) {width:7%;}
-.allocation-table th:nth-child(3) {width:10%;} .allocation-table th:nth-child(4) {width:21%;}
-.allocation-table th:nth-child(5) {width:7%;} .allocation-table th:nth-child(6) {width:15%;}
-.allocation-table th:nth-child(7) {width:11%;} .allocation-table th:last-child {width:10%;}
 .decision-log {margin-top:22px; border-top:1px solid var(--border);}
 .log-toggle {width:100%; justify-content:flex-start; padding:20px 0; font-size:12px; height:auto;}
 .log-toggle[aria-expanded=true] svg {transform:rotate(180deg);}
