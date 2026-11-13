@@ -2,6 +2,7 @@ import { Check, Loader2, Play, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DEMO_STEPS, demoSummary, type StepState } from "@/lib/demo-guide";
 import { SUGGESTED_QUESTIONS } from "@/lib/procurement-demo";
+import { loadTone } from "@/components/task-router";
 import type { Workspace } from "@/lib/rag.functions";
 
 type Props = {
@@ -35,7 +36,7 @@ export function DemoGuide({ workspace, states, current, complete, starting, erro
     {summary && <div className="demo-summary">
       <p className="demo-summary-title">Handover complete — every AI proposal has a manager decision.</p>
       <p>Tasks reassigned <strong>{summary.reassigned}</strong><span className="mx-2">·</span>Manager overrides <strong>{summary.overrides}</strong> ({summary.overrideRate}% override rate, {summary.rejected} rejected)</p>
-      <div className="demo-loads">{summary.loads.map((l) => <span key={l.name}>{l.name} <strong>{l.before}% → {l.after}%</strong></span>)}</div>
+      <div className="demo-loads">{summary.loads.map((l) => <span key={l.name}>{l.name} <strong>{l.before}% → <span className={`load-${loadTone(l.after)}`}>{l.after}%</span></strong></span>)}</div>
     </div>}
   </section>;
 }

@@ -22,29 +22,53 @@
   --color-input: var(--border);
   --color-ring: var(--primary);
   --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
   --color-success: var(--success);
   --radius-md: 6px;
   --radius-lg: 8px;
 }
 :root {
-  /* Premium dark mode — deep corporate navy with electric-blue accent */
-  --background: oklch(.165 .022 258);
-  --foreground: oklch(.945 .008 250);
-  --card: oklch(.215 .026 258);
-  --primary: oklch(.68 .17 232);
-  --primary-foreground: oklch(.13 .02 258);
-  --secondary: oklch(.26 .028 258);
-  --muted: oklch(.24 .026 258);
-  --muted-foreground: oklch(.72 .02 255);
-  --accent: oklch(.30 .05 245);
-  --border: oklch(.30 .022 258);
-  --destructive: oklch(.66 .19 25);
-  --success: oklch(.76 .14 168);
-  --success-soft: oklch(.30 .045 168);
-  --warning: oklch(.8 .13 82);
-  --warning-soft: oklch(.32 .045 80);
-  --sidebar: oklch(.185 .024 258);
-  --shadow-panel: 0 6px 18px oklch(.1 .02 260 / .45);
+  /* Dark theme (default) — deep navy page, lighter slate panels, meaning-based accents */
+  --background: #080F18;
+  --foreground: #EEF2F7;
+  --card: #141E2B;
+  --primary: #00A7EE;
+  --primary-foreground: #061018;
+  --secondary: #1D2939;
+  --muted: #1A2433;
+  --muted-foreground: #A3ACB8;
+  --accent: #0E2C42;
+  --border: #253244;
+  --destructive: #F05653;
+  --destructive-soft: #3A1A1F;
+  --success: #37CDA0;
+  --success-soft: #10342C;
+  --warning: #E7B551;
+  --warning-soft: #3A2F16;
+  --link: #00A7EE;
+  --sidebar: #0F1824;
+  --shadow-panel: 0 6px 18px rgb(0 0 0 / .45);
+}
+:root.light {
+  --background: #F3F5F8;
+  --foreground: #0E1726;
+  --card: #FFFFFF;
+  --primary: #0077B6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E8ECF1;
+  --muted: #EEF1F5;
+  --muted-foreground: #5B6675;
+  --accent: #E1F0F8;
+  --border: #D9DEE5;
+  --destructive: #C8302D;
+  --destructive-soft: #FBE7E6;
+  --success: #128A66;
+  --success-soft: #DDF4EC;
+  --warning: #9A6A00;
+  --warning-soft: #FBF0D6;
+  --link: #0077B6;
+  --sidebar: #FFFFFF;
+  --shadow-panel: 0 4px 14px rgb(14 23 38 / .07);
 }
 @layer base {
   * { border-color: var(--border); box-sizing: border-box; }
@@ -236,3 +260,33 @@ td {padding:19px 22px; border-top:1px solid var(--border); line-height:1.8;} td:
 .demo-summary-title {color:var(--success); font-weight:700;}
 .demo-loads {display:flex; flex-wrap:wrap; gap:18px;}
 @media (max-width:900px){ .demo-guide-row{flex-direction:column; align-items:stretch;} .demo-steps{grid-template-columns:repeat(2,minmax(0,1fr));} }
+
+/* Projector readability: nothing under 12px, body 13-14px */
+.brand-subtitle,.nav-label,.small-label,.workspace-box p,.profile p,.profile strong,.demo-tag,.online,.breadcrumb,.eyebrow,.security-badge,.panel-subtitle,.count-badge,.drop-zone p,.drop-zone .file-types,.file-info p,.ingestion-note,.chat-name span,.suggestions .small-label,.source-chip,.source-excerpt,.cached-tag,.composer-note,.footer,.task-number,.team-info p,.workload,.allocation-action p,.allocation-empty p,th,td:last-child,.task-detail p,.task-due,.priority,.review-metrics small,.review-status,.log-entry time,.log-reason,.demo-step-text small,.demo-question,.demo-mode,.tab-button { font-size:12px; }
+.file-info strong,.chat-name,.welcome-message,.suggestion-button,.user-bubble,.composer-form input,.pending-task,.team-info strong,.allocation-action button,.allocation-empty h3,table,.review-metrics,.log-entries,.preview-loads,.nav-button,.drop-zone h3,.indexed-heading { font-size:13px; }
+.page-subtitle,.panel-title,.demo-hint,.demo-summary,.demo-step-text { font-size:14px; }
+.tab-button { font-size:13px; }
+@media(max-width:1100px) {.brand-subtitle {font-size:12px;}}
+@media(max-width:800px) {.footer {font-size:12px;}}
+/* Status strip replaces the stat cards */
+.status-strip { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:18px 0 24px; font-size:13px; color:var(--muted-foreground); }
+.status-strip strong { color:var(--foreground); font-weight:700; }
+.status-ok { display:inline-flex; align-items:center; gap:6px; color:var(--success); }
+.theme-toggle { color:var(--muted-foreground); }
+/* Meaning-based colour: cyan = action/current, teal = done/healthy, amber = attention, red = overloaded/rejected */
+.red {background:var(--destructive-soft); color:var(--destructive);}
+.capacity-fill.red {background:var(--destructive);}
+.priority-high {background:var(--warning-soft); color:var(--warning);}
+.priority-medium {background:var(--secondary); color:var(--foreground);}
+.priority-low {background:var(--secondary); color:var(--muted-foreground);}
+.confidence-high,.confidence-medium,.confidence-low {background:transparent; border:1px solid var(--border); color:var(--foreground);}
+.confidence-low {color:var(--muted-foreground);}
+.review-status.blue {background:var(--accent); color:var(--link);}
+.log-reject strong::after {content:" · Rejected"; color:var(--destructive); font-weight:600;}
+.log-approve strong::after {content:" · Approved"; color:var(--success); font-weight:600;}
+.log-reassign strong::after {content:" · Reassigned"; color:var(--warning); font-weight:600;}
+.demo-step.done .demo-step-text small {color:var(--success);}
+.demo-step.current .demo-step-text small {color:var(--primary);}
+.load-green {color:var(--success);} .load-amber {color:var(--warning);} .load-red {color:var(--destructive);}
+.eyebrow,.brand-ai,.review-banner,.demo-hint strong,.source-chip,.nav-button.active,.tab-button.active {color:var(--link);}
+.avatar,.demo-step-dot,.assignee .avatar {font-size:12px;}
