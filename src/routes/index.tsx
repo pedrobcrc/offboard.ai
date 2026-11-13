@@ -63,6 +63,14 @@ function Dashboard() {
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState("");
   const progress = demoProgress({ documentCount: workspace.documents.length, answered: messages.some((m) => m.role === "assistant" && !m.failed), tasks: workspace.tasks, decisions: workspace.decisions });
+  const autoAdvanced = useRef(false);
+  useEffect(() => {
+    if (autoAdvanced.current || progress.states[1] !== "done") return;
+    autoAdvanced.current = true;
+    const timer = setTimeout(() => goToStep(2), 2500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progress.states[1]]);
   function goToStep(index: number) {
     setView(index < 2 ? "knowledge" : "tasks");
     setTimeout(() => document.getElementById(DEMO_STEPS[index]?.id ?? "")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
@@ -74,6 +82,7 @@ function Dashboard() {
       if (!result.ok) { setStartError(result.message ?? "Could not start the demo."); return; }
       queryClient.setQueryData(["workspace"], await refreshFn());
       setMessages([]); setInput("");
+      autoAdvanced.current = false;
       goToStep(1);
     } catch { setStartError("Could not start the demo. Please try again."); }
     finally { setStarting(false); }
