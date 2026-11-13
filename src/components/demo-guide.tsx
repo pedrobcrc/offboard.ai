@@ -28,7 +28,7 @@ export function DemoGuide({ workspace, states, current, complete, starting, erro
       </li>)}</ol>
       <Button onClick={onStart} disabled={starting} className="demo-start">{starting ? <Loader2 className="animate-spin" /> : complete ? <RotateCcw size={14} /> : <Play size={14} />}{complete ? "Restart demo" : "Start demo"}</Button>
     </div>
-    {!complete && <div className="demo-hint"><strong>Step {current + 1}.</strong> {DEMO_STEPS[current].hint}
+    {!complete && <div className="demo-hint"><strong>Step {current + 1}.</strong> {DEMO_STEPS[current]?.hint}
       {current === 1 && SUGGESTED_QUESTIONS.map((q) => <Button key={q} variant="outline" size="sm" className="demo-question" onClick={() => onAsk(q)}>{q}</Button>)}
     </div>}
     {error && <p role="alert" className="ingestion-error">{error}</p>}

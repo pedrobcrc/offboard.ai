@@ -65,7 +65,7 @@ function Dashboard() {
   const progress = demoProgress({ documentCount: workspace.documents.length, answered: messages.some((m) => m.role === "assistant" && !m.failed), tasks: workspace.tasks, decisions: workspace.decisions });
   function goToStep(index: number) {
     setView(index < 2 ? "knowledge" : "tasks");
-    setTimeout(() => document.getElementById(DEMO_STEPS[index].id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+    setTimeout(() => document.getElementById(DEMO_STEPS[index]?.id ?? "")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   }
   async function startDemo() {
     setStarting(true); setStartError("");
