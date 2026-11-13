@@ -51,6 +51,17 @@ function Dashboard() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [demoMode, setDemoMode] = useState(false);
+  const [guidedDemo, setGuidedDemo] = useState(false);
+  useEffect(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get("demo") === "1") { setGuidedDemo(true); return; }
+      setGuidedDemo(window.localStorage.getItem("guided-demo") === "1");
+    } catch { /* keep default off */ }
+  }, []);
+  function toggleGuidedDemo(on: boolean) {
+    setGuidedDemo(on);
+    try { window.localStorage.setItem("guided-demo", on ? "1" : "0"); } catch { /* storage unavailable */ }
+  }
   const [expanded, setExpanded] = useState<string | null>(null);
   const [sidebarPeeking, setSidebarPeeking] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -65,12 +76,12 @@ function Dashboard() {
   const progress = demoProgress({ documentCount: workspace.documents.length, answered: messages.some((m) => m.role === "assistant" && !m.failed), tasks: workspace.tasks, decisions: workspace.decisions });
   const autoAdvanced = useRef(false);
   useEffect(() => {
-    if (autoAdvanced.current || progress.states[1] !== "done") return;
+    if (!guidedDemo || autoAdvanced.current || progress.states[1] !== "done") return;
     autoAdvanced.current = true;
     const timer = setTimeout(() => goToStep(2), 2500);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progress.states[1]]);
+  }, [progress.states[1], guidedDemo]);
   function goToStep(index: number) {
     setView(index < 2 ? "knowledge" : "tasks");
     setTimeout(() => document.getElementById(DEMO_STEPS[index]?.id ?? "")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
@@ -149,10 +160,10 @@ function Dashboard() {
       <nav aria-label="Main navigation"><p className="nav-label">WORKSPACE</p>{tabs.map(({ id, label, icon: Icon }) => <Button key={id} variant="ghost" className={`nav-button ${view === id ? "active" : ""}`} onClick={() => setView(id)} aria-current={view === id ? "page" : undefined}><Icon size={18} />{label}{view === id && <ChevronRight className="ml-auto" size={14} />}</Button>)}</nav>
       <div className="sidebar-bottom"><div className="workspace-box"><div className="flex items-center gap-2"><span className="status-dot" /><strong className="text-[11px]">Continuity workspace</strong></div><p>Your knowledge stays.<br />Your business moves forward.</p><div className="mt-3 flex items-center gap-1.5 text-[9px] text-muted-foreground"><ShieldCheck size={12} /> Private demo environment</div></div><div className="profile"><span className="avatar">AC</span><div><strong>Alex Carter</strong><p>Procurement Manager</p></div><span className="ml-auto text-muted-foreground"><MoreHorizontal size={16} /></span></div></div>
     </aside>
-    <div className="main-shell" onMouseEnter={() => peek(false)}><header className="topbar"><div className="breadcrumb"><Layers3 size={15} /><span>Workspace</span><ChevronRight size={12} /><strong>{view === "knowledge" ? "Knowledge Retriever" : "Task Router"}</strong></div><div className="topbar-right"><label className="demo-mode" htmlFor="demo-mode-switch"><span>Demo mode</span><Switch id="demo-mode-switch" checked={demoMode} onCheckedChange={setDemoMode} /></label><span className="online"><span className="status-dot" /> Workspace active</span><span className="demo-tag">DEMO</span><span className="text-muted-foreground" title="No new notifications"><Bell size={17} /></span><span className="avatar">AC</span></div></header>
+    <div className="main-shell" onMouseEnter={() => peek(false)}><header className="topbar"><div className="breadcrumb"><Layers3 size={15} /><span>Workspace</span><ChevronRight size={12} /><strong>{view === "knowledge" ? "Knowledge Retriever" : "Task Router"}</strong></div><div className="topbar-right"><label className="demo-mode" htmlFor="guided-demo-switch"><span>Guided demo</span><Switch id="guided-demo-switch" checked={guidedDemo} onCheckedChange={toggleGuidedDemo} /></label><label className="demo-mode" htmlFor="demo-mode-switch"><span>Demo mode</span><Switch id="demo-mode-switch" checked={demoMode} onCheckedChange={setDemoMode} /></label><span className="online"><span className="status-dot" /> Workspace active</span><span className="demo-tag">DEMO</span><span className="text-muted-foreground" title="No new notifications"><Bell size={17} /></span><span className="avatar">AC</span></div></header>
       <main className="main-content"><div className="page-title-row"><div><p className="eyebrow"><Sparkles size={12} /> Procurement intelligence</p><h1>{view === "knowledge" ? "Knowledge Retriever" : "Task Router"}</h1><p className="page-subtitle">{view === "knowledge" ? "Keep the knowledge. Maintain the momentum." : "The right work. The right people. A seamless handover."}</p></div><div className="security-badge"><ShieldCheck size={15} /> Procurement continuity, by design</div></div>
         <section className="stats" aria-label="Workspace overview"><Stat icon={FileText} label="Indexed documents" value={String(workspace.documents.length).padStart(2, "0")} note="Ready for retrieval" /><Stat icon={CheckCheck} label="Knowledge status" value="Up to date" note="All sources available" /><Stat icon={Users} label="Connected team" value={String(workspace.team.length).padStart(2, "0")} note="Procurement specialists" /></section>
-        <DemoGuide workspace={workspace} {...progress} starting={starting} error={startError} onStart={startDemo} onStep={goToStep} onAsk={(q) => { goToStep(1); setInput(q); ask(q); }} />
+        {guidedDemo && <DemoGuide workspace={workspace} {...progress} starting={starting} error={startError} onStart={startDemo} onStep={goToStep} onAsk={(q) => { goToStep(1); setInput(q); ask(q); }} />}
         <div className="view-tabs" role="tablist" aria-label="Workspace views">{tabs.map(({ id, label, icon: Icon }) => <Button key={id} role="tab" aria-selected={view === id} aria-controls={`${id}-panel`} id={`${id}-tab`} variant="ghost" className={`tab-button ${view === id ? "active" : ""}`} onClick={() => setView(id)}><Icon size={15} />{label}</Button>)}</div>
         {view === "knowledge" ? <section className="retriever-grid fade-in" role="tabpanel" id="knowledge-panel" aria-labelledby="knowledge-tab">
           <div className="panel" id="files-section"><PanelHead icon={FileText} title="Knowledge sources" subtitle="Your procurement source of truth" badge={String(workspace.documents.length)} /><div className="ingestion-body"><div className={`drop-zone ${dragging ? "dragging" : ""}`} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); upload(event.dataTransfer.files); }}><div className="upload-icon">{uploading ? <Loader2 className="animate-spin" size={22} /> : <UploadCloud size={23} strokeWidth={1.6} />}</div><h3>{uploading ? "Adding your documents…" : "Drop your documents here"}</h3><p>Keep every detail within reach.</p><Button variant="outline" size="sm" className="text-[10px]" disabled={uploading} onClick={() => fileInput.current?.click()}><ArrowUpRight size={12} />Browse files</Button><input ref={fileInput} type="file" multiple accept=".txt,.md,.eml,.csv,.pdf" hidden onChange={(event) => upload(event.target.files)} /><p className="file-types">PDF, EML, TXT, MD & CSV</p></div>{uploadError && <p className="ingestion-error">{uploadError}</p>}<div className="indexed-heading"><span>Successfully Indexed Files</span><span className="count-badge">{workspace.documents.length} files</span></div><div>{workspace.documents.map((file) => <div className="file-row fade-in" key={file.id}><span className={`file-icon ${file.kind.toLowerCase()}`}>{file.kind === "EML" ? <Mail size={17} /> : file.kind === "XLSX" ? <FileSpreadsheet size={17} /> : <FileText size={17} />}</span><div className="file-info"><strong>{file.filename}</strong><p>{file.sizeLabel} <span className="mx-1">·</span> {file.detail}</p></div><CircleCheck className="file-check" size={14} /></div>)}</div></div><div className="ingestion-note"><LockKeyhole size={12} /> Documents are stored and searched in your workspace</div></div>
