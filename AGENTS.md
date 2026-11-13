@@ -40,3 +40,4 @@ use the editor.
 - Reset visitor uploads inside the atomic database reset using the upload detail marker, a seeded-filename exclusion and scoped DELETE policy; cascading foreign keys remove their search chunks while protecting seeded evidence.
 - Validate model allocations with the shared pure validator and allow exactly one correction call for local validation errors before atomic persistence; gateway failures remain outside this retry to preserve terminal error handling.
 - Keep answer-source filtering in a browser-safe presentation helper; retain all retrieved evidence on the server and fetch fresh workspace data into the query cache after manager decisions so review rows update immediately.
+- Derive guided-demo step progress from workspace data via the pure helper in src/lib/demo-guide.ts; the guide adds UI only and reuses the existing reset function.
