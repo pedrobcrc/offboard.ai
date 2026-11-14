@@ -37,6 +37,7 @@ use the editor.
 - Define application visual treatments in the global design system and use the shared Button for interactive actions.
 - Keep Task Router presentation in its dedicated component; validate AI assignments before atomic database persistence so missing tasks or over-capacity allocations never partially save.
 - Store buyer capacity as the baseline and derive projected workloads from persisted task criticality to avoid double-counting on refresh.
+- Use the shared workload cap for prompts, validation and presentation; derive database-check migration limits from that constant and test parity so enforcement cannot drift.
 - Persist AI proposals and manager decisions separately; reassignment stays proposed until approval, and review/reset operations update tasks and the audit log atomically in the shared demo workspace.
 - Reset visitor uploads inside the atomic database reset using the upload detail marker, a seeded-filename exclusion and scoped DELETE policy; cascading foreign keys remove their search chunks while protecting seeded evidence.
 - Validate model allocations with the shared pure validator and allow exactly one correction call for local validation errors before atomic persistence; gateway failures remain outside this retry to preserve terminal error handling.

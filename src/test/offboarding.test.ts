@@ -20,6 +20,6 @@ describe("Allocation prompt", () => {
     const prompt = allocationSystemPrompt({ departingName: "David", departingRole: "Logistics expert", lastWorkingDay: "2026-12-31" }, ["handover.txt"]);
     expect(prompt).toContain("David (Logistics expert) is leaving on 2026-12-31");
     expect(prompt).not.toContain("Laura");
-    expect(prompt).toContain("Never exceed 100% projected workload");
+    expect(prompt).toContain("Never exceed 90% projected workload, keep at least 10% spare");
   });
 });

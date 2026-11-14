@@ -71,6 +71,13 @@
       "when": 1794687599397,
       "tag": "0009_multi_offboarding",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794690653644,
+      "tag": "0010_workload_safety_cap",
+      "breakpoints": true
     }
   ]
 }

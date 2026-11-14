@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { allocateWithRetry, allocationSystemPrompt, buyerEditSchema, newOffboardingSchema, newTasksSchema, projectedWorkload, reviewSchema, type Criticality } from "@/lib/task-router";
+import { WORKLOAD_CAP, isWorkloadWarning, allocateWithRetry, allocationSystemPrompt, buyerEditSchema, newOffboardingSchema, newTasksSchema, projectedWorkload, reviewSchema, type Criticality } from "@/lib/task-router";
 import { NOT_FOUND_ANSWER } from "@/lib/procurement-demo";
 
 /** Files the upload flow can read: plain text formats plus PDF (text extracted in the browser). */
@@ -327,7 +327,7 @@ export const updateBuyer = createServerFn({ method: "POST" })
     const supabase = publicClient();
     const { data: tasks, error: taskError } = await supabase.from("tasks").select("criticality").in("status", ["proposed", "approved"]).eq("assigned_member_id", data.id);
     if (taskError) return { ok: false as const, message: taskError.message };
-    if (projectedWorkload(data.capacity, tasks ?? []) > 100) return { ok: false as const, message: "Current assignments would push this buyer above 100%." };
+    if (isWorkloadWarning(projectedWorkload(data.capacity, tasks ?? []))) return { ok: false as const, message: `Current assignments would push this buyer above ${WORKLOAD_CAP}%.` };
     const { error } = await supabase.from("team_members").update({ name: data.name, expertise: data.expertise, capacity: data.capacity, workload: `${data.capacity}%`, initials: data.name.split(/\s+/).map((word) => word[0]).join("").slice(0,2).toUpperCase() }).eq("id", data.id);
     return error ? { ok: false as const, message: error.message } : { ok: true as const };
   });
