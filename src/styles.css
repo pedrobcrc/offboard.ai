@@ -290,3 +290,25 @@ td {padding:19px 22px; border-top:1px solid var(--border); line-height:1.8;} td:
 .load-green {color:var(--success);} .load-amber {color:var(--warning);} .load-red {color:var(--destructive);}
 .eyebrow,.brand-ai,.review-banner,.demo-hint strong,.source-chip,.nav-button.active,.tab-button.active {color:var(--link);}
 .avatar,.demo-step-dot,.assignee .avatar {font-size:12px;}
+
+/* Offboarding switcher and new-offboarding form */
+.offboarding-switcher { display:grid; gap:8px; margin:-18px 0 26px; }
+.offboarding-switcher .nav-label { padding:0 4px 2px; }
+.offboarding-trigger { font-size:12px; height:auto; min-height:36px; text-align:left; background:var(--background); border-color:var(--border); }
+.new-offboarding { justify-content:flex-start; font-size:12px; }
+.offboarding-dialog { max-width:640px; }
+.wizard-steps { display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--muted-foreground); margin-top:12px; }
+.wizard-steps li { display:flex; align-items:center; gap:6px; }
+.wizard-steps span { width:20px; height:20px; border-radius:99px; display:grid; place-items:center; border:1px solid var(--border); font-size:12px; }
+.wizard-steps li.current { color:var(--foreground); font-weight:700; }
+.wizard-steps li.current span { border-color:var(--primary); color:var(--link); }
+.wizard-steps li.done span { background:var(--success); border-color:var(--success); color:var(--background); }
+.wizard-choice { display:flex; gap:8px; }
+.wizard-choice .active { border-color:var(--primary); color:var(--link); }
+.wizard-note { color:var(--muted-foreground); font-size:12px; }
+.wizard-file { display:flex; align-items:center; gap:8px; font-size:12px; }
+.wizard-csv { display:flex; gap:8px; }
+.wizard-tasks { display:grid; gap:8px; }
+.wizard-task { display:grid; grid-template-columns:1fr 1.6fr 130px 104px 32px; gap:6px; align-items:center; }
+.wizard-task input { background:var(--background); color:var(--foreground); border:1px solid var(--border); border-radius:6px; padding:8px; font-size:12px; min-width:0; }
+@media(max-width:800px) { .offboarding-switcher { margin:0; } .offboarding-switcher .nav-label { display:none; } .wizard-task { grid-template-columns:1fr 1fr; } }

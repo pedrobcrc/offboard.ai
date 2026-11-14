@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.18"
-  }
   public: {
     Tables: {
       document_chunks: {
@@ -54,6 +49,7 @@ export type Database = {
           filename: string
           id: string
           kind: string
+          offboarding_id: string
           size_label: string
         }
         Insert: {
@@ -63,6 +59,7 @@ export type Database = {
           filename: string
           id?: string
           kind: string
+          offboarding_id?: string
           size_label: string
         }
         Update: {
@@ -72,9 +69,59 @@ export type Database = {
           filename?: string
           id?: string
           kind?: string
+          offboarding_id?: string
           size_label?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "documents_offboarding_id_fkey"
+            columns: ["offboarding_id"]
+            isOneToOne: false
+            referencedRelation: "offboardings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offboardings: {
+        Row: {
+          created_at: string
+          departing_member_id: string | null
+          departing_name: string
+          departing_role: string
+          id: string
+          is_sample: boolean
+          last_working_day: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          departing_member_id?: string | null
+          departing_name: string
+          departing_role: string
+          id?: string
+          is_sample?: boolean
+          last_working_day: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          departing_member_id?: string | null
+          departing_name?: string
+          departing_role?: string
+          id?: string
+          is_sample?: boolean
+          last_working_day?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offboardings_departing_member_id_fkey"
+            columns: ["departing_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       task_decisions: {
         Row: {
@@ -83,6 +130,7 @@ export type Database = {
           created_at: string
           final_decision: string
           id: string
+          offboarding_id: string
           proposal_id: string
           reason: string
           task_id: string
@@ -94,6 +142,7 @@ export type Database = {
           created_at?: string
           final_decision: string
           id?: string
+          offboarding_id?: string
           proposal_id: string
           reason: string
           task_id: string
@@ -105,12 +154,21 @@ export type Database = {
           created_at?: string
           final_decision?: string
           id?: string
+          offboarding_id?: string
           proposal_id?: string
           reason?: string
           task_id?: string
           task_title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "task_decisions_offboarding_id_fkey"
+            columns: ["offboarding_id"]
+            isOneToOne: false
+            referencedRelation: "offboardings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tasks: {
         Row: {
@@ -124,6 +182,7 @@ export type Database = {
           criticality: string
           due_date: string | null
           id: string
+          offboarding_id: string
           overridden: boolean
           position: number
           proposal_id: string | null
@@ -144,6 +203,7 @@ export type Database = {
           criticality?: string
           due_date?: string | null
           id?: string
+          offboarding_id?: string
           overridden?: boolean
           position?: number
           proposal_id?: string | null
@@ -164,6 +224,7 @@ export type Database = {
           criticality?: string
           due_date?: string | null
           id?: string
+          offboarding_id?: string
           overridden?: boolean
           position?: number
           proposal_id?: string | null
@@ -173,11 +234,20 @@ export type Database = {
           supplier?: string
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_offboarding_id_fkey"
+            columns: ["offboarding_id"]
+            isOneToOne: false
+            referencedRelation: "offboardings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
           capacity: number
+          departed: boolean
           expertise: string
           id: string
           initials: string
@@ -188,6 +258,7 @@ export type Database = {
         }
         Insert: {
           capacity: number
+          departed?: boolean
           expertise: string
           id?: string
           initials: string
@@ -198,6 +269,7 @@ export type Database = {
         }
         Update: {
           capacity?: number
+          departed?: boolean
           expertise?: string
           id?: string
           initials?: string
@@ -234,8 +306,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_offboarding_allocations: {
+        Args: { p_allocations: Json; p_offboarding_id: string }
+        Returns: undefined
+      }
       apply_task_allocations: {
         Args: { p_allocations: Json }
+        Returns: undefined
+      }
+      approve_offboarding_tasks: {
+        Args: { p_offboarding_id: string }
         Returns: undefined
       }
       approve_remaining_tasks: { Args: never; Returns: undefined }
@@ -259,6 +339,16 @@ export type Database = {
       }
       search_chunks: {
         Args: { p_limit?: number; p_question: string }
+        Returns: {
+          chunk_id: number
+          content: string
+          document_id: string
+          filename: string
+          score: number
+        }[]
+      }
+      search_offboarding_chunks: {
+        Args: { p_limit?: number; p_offboarding_id: string; p_question: string }
         Returns: {
           chunk_id: number
           content: string
@@ -399,3 +489,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
