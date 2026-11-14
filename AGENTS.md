@@ -31,7 +31,8 @@ use the editor.
 
 ## Application architecture
 - Keep both procurement tabs in one dashboard at `/`; they are two views of one continuous workspace.
-- Keep procurement documents, their searchable chunks, team, tasks and workspace info in the database; the browser-safe demo module holds only suggested questions, cached demo-mode answers and file-type rules.
+- Scope documents, tasks and decisions to an offboarding; Laura's case is the fixed-id sample offboarding, and the guided demo, suggested questions, cached answers and Reset demo apply only to it so other offboardings stay untouched.
+- Build AI prompts from the active offboarding's data (departing person, remaining pool, tasks, documents); the assignee pool excludes departed members and the offboarding's own departing member, and completed offboardings are read-only in both server functions and database functions.
 - Run retrieval and model calls inside server functions only; the browser reads documents through those functions and never talks to the model directly.
 - Define application visual treatments in the global design system and use the shared Button for interactive actions.
 - Keep Task Router presentation in its dedicated component; validate AI assignments before atomic database persistence so missing tasks or over-capacity allocations never partially save.

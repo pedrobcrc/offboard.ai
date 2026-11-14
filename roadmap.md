@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Support any departing buyer: offboardings with their own files, tasks and decision log, switcher, 3-step creation form with CSV import, generic AI prompts, read-only completed history.
 - [x] Remove visitor uploads and chunks on reset while preserving six seeded documents; verify upload/reset and leave the demo reset.
 - [x] Fit allocation columns at desktop widths and combine review status/actions.
 - [x] Refresh workspace after decisions and filter answer source chips.

@@ -23,7 +23,7 @@ it.skipIf(process.env["RUN_DEMO_RESET_TEST"] !== "1")("reset removes uploaded fi
     const reset = await client.rpc("reset_task_demo");
     expect(reset.error).toBeNull();
   }
-  const files = await client.from("documents").select("filename");
+  const files = await client.from("documents").select("filename").eq("offboarding_id", "00000000-0000-4000-8000-0000000000a1");
   expect(files.error).toBeNull();
   expect(files.data?.map((file) => file.filename).sort()).toEqual(seeded);
   const removedChunks = await client.from("document_chunks").select("id").eq("document_id", id);
