@@ -21,7 +21,7 @@ describe("Read-only decisions endpoint", () => {
     mock.select.mockReturnValue(mock);
     mock.order.mockReturnValue(mock);
     mock.range.mockResolvedValue({ data: [], error: null });
-    mock.eq.mockResolvedValue({ data: [], error: null });
+    mock.eq.mockReturnValue(mock);
   });
   afterEach(() => vi.unstubAllEnvs());
   it("rejects a missing header before database access", async () => {

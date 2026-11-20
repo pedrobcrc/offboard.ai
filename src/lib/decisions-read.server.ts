@@ -49,10 +49,9 @@ export async function handleDecisionsRead(request: Request): Promise<Response> {
     const pageSize = 1000;
     for (let offset = 0; ; offset += pageSize) {
       let query = supabaseAdmin.from("task_decisions").select(columns)
-        .order("created_at", { ascending: true }).order("id", { ascending: true })
-        .range(offset, offset + pageSize - 1);
+        .order("created_at", { ascending: true }).order("id", { ascending: true });
       if (offboardingId) query = query.eq("offboarding_id", offboardingId);
-      const { data, error } = await query;
+      const { data, error } = await query.range(offset, offset + pageSize - 1);
       if (error) return json({ error: "Unable to read decisions" }, 500);
       rows.push(...(data ?? []));
       if (!data || data.length < pageSize) break;
