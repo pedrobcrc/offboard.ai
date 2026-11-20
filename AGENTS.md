@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Application architecture
+- Serve external decision-log reads at `/api/public/decisions-read`; authorize the shared header before loading the service-role client, and use SELECT only so n8n cannot modify workspace data.
 - Keep both procurement tabs in one dashboard at `/`; they are two views of one continuous workspace.
 - Scope documents, tasks and decisions to an offboarding; Laura's case is the fixed-id sample offboarding, and the guided demo, suggested questions, cached answers and Reset demo apply only to it so other offboardings stay untouched.
 - Build AI prompts from the active offboarding's data (departing person, remaining pool, tasks, documents); the assignee pool excludes departed members and the offboarding's own departing member, and completed offboardings are read-only in both server functions and database functions.

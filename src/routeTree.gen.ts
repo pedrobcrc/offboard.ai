@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicDecisionsReadRouteImport } from './routes/api/public/decisions-read'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDecisionsReadRoute = ApiPublicDecisionsReadRouteImport.update({
+  id: '/api/public/decisions-read',
+  path: '/api/public/decisions-read',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/decisions-read': typeof ApiPublicDecisionsReadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/decisions-read': typeof ApiPublicDecisionsReadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/decisions-read': typeof ApiPublicDecisionsReadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/decisions-read'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/decisions-read'
+  id: '__root__' | '/' | '/api/public/decisions-read'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicDecisionsReadRoute: typeof ApiPublicDecisionsReadRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/decisions-read': {
+      id: '/api/public/decisions-read'
+      path: '/api/public/decisions-read'
+      fullPath: '/api/public/decisions-read'
+      preLoaderRoute: typeof ApiPublicDecisionsReadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicDecisionsReadRoute: ApiPublicDecisionsReadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
