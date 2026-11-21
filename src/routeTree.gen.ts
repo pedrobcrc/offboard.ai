@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicDecisionsReadRouteImport } from './routes/api/public/decisions-read'
+import { Route as ApiPublicOutcomesDueRouteImport } from './routes/api/public/outcomes-due'
+import { Route as ApiPublicOutcomesMarkSentRouteImport } from './routes/api/public/outcomes-mark-sent'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +24,63 @@ const ApiPublicDecisionsReadRoute = ApiPublicDecisionsReadRouteImport.update({
   path: '/api/public/decisions-read',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicOutcomesDueRoute = ApiPublicOutcomesDueRouteImport.update({
+  id: '/api/public/outcomes-due',
+  path: '/api/public/outcomes-due',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicOutcomesMarkSentRoute =
+  ApiPublicOutcomesMarkSentRouteImport.update({
+    id: '/api/public/outcomes-mark-sent',
+    path: '/api/public/outcomes-mark-sent',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/public/decisions-read': typeof ApiPublicDecisionsReadRoute
+  '/api/public/outcomes-due': typeof ApiPublicOutcomesDueRoute
+  '/api/public/outcomes-mark-sent': typeof ApiPublicOutcomesMarkSentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/public/decisions-read': typeof ApiPublicDecisionsReadRoute
+  '/api/public/outcomes-due': typeof ApiPublicOutcomesDueRoute
+  '/api/public/outcomes-mark-sent': typeof ApiPublicOutcomesMarkSentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/public/decisions-read': typeof ApiPublicDecisionsReadRoute
+  '/api/public/outcomes-due': typeof ApiPublicOutcomesDueRoute
+  '/api/public/outcomes-mark-sent': typeof ApiPublicOutcomesMarkSentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/decisions-read'
+  fullPaths:
+    | '/'
+    | '/api/public/decisions-read'
+    | '/api/public/outcomes-due'
+    | '/api/public/outcomes-mark-sent'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/decisions-read'
-  id: '__root__' | '/' | '/api/public/decisions-read'
+  to:
+    | '/'
+    | '/api/public/decisions-read'
+    | '/api/public/outcomes-due'
+    | '/api/public/outcomes-mark-sent'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/public/decisions-read'
+    | '/api/public/outcomes-due'
+    | '/api/public/outcomes-mark-sent'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiPublicDecisionsReadRoute: typeof ApiPublicDecisionsReadRoute
+  ApiPublicOutcomesDueRoute: typeof ApiPublicOutcomesDueRoute
+  ApiPublicOutcomesMarkSentRoute: typeof ApiPublicOutcomesMarkSentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +99,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDecisionsReadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/outcomes-due': {
+      id: '/api/public/outcomes-due'
+      path: '/api/public/outcomes-due'
+      fullPath: '/api/public/outcomes-due'
+      preLoaderRoute: typeof ApiPublicOutcomesDueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/outcomes-mark-sent': {
+      id: '/api/public/outcomes-mark-sent'
+      path: '/api/public/outcomes-mark-sent'
+      fullPath: '/api/public/outcomes-mark-sent'
+      preLoaderRoute: typeof ApiPublicOutcomesMarkSentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiPublicDecisionsReadRoute: ApiPublicDecisionsReadRoute,
+  ApiPublicOutcomesDueRoute: ApiPublicOutcomesDueRoute,
+  ApiPublicOutcomesMarkSentRoute: ApiPublicOutcomesMarkSentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

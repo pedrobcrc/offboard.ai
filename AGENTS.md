@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Application architecture
+- Outcome endpoints authorize the n8n header before loading the privileged client and bind inputs to service-role-only SQL helpers, preserving exact query semantics without exposing database execution to visitors.
 - Serve external decision-log reads at `/api/public/decisions-read`; authorize the shared header before loading the service-role client, and use SELECT only so n8n cannot modify workspace data.
 - Keep both procurement tabs in one dashboard at `/`; they are two views of one continuous workspace.
 - Scope documents, tasks and decisions to an offboarding; Laura's case is the fixed-id sample offboarding, and the guided demo, suggested questions, cached answers and Reset demo apply only to it so other offboardings stay untouched.

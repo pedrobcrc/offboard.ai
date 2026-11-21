@@ -382,6 +382,8 @@ export type Database = {
         }[]
       }
       index_document: { Args: { p_document_id: string }; Returns: number }
+      n8n_outcomes_due: { Args: { p_days: number }; Returns: Json }
+      n8n_outcomes_mark_sent: { Args: { p_items: Json }; Returns: number }
       reset_task_demo: { Args: never; Returns: undefined }
       review_task: {
         Args: {
