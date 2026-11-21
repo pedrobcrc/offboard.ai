@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicDecisionsReadRouteImport } from './routes/api/public/decisions-read'
 import { Route as ApiPublicOutcomesDueRouteImport } from './routes/api/public/outcomes-due'
 import { Route as ApiPublicOutcomesMarkSentRouteImport } from './routes/api/public/outcomes-mark-sent'
+import { Route as ApiPublicRecordOutcomeRouteImport } from './routes/api/public/record-outcome'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -35,18 +36,25 @@ const ApiPublicOutcomesMarkSentRoute =
     path: '/api/public/outcomes-mark-sent',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicRecordOutcomeRoute = ApiPublicRecordOutcomeRouteImport.update({
+  id: '/api/public/record-outcome',
+  path: '/api/public/record-outcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/public/decisions-read': typeof ApiPublicDecisionsReadRoute
   '/api/public/outcomes-due': typeof ApiPublicOutcomesDueRoute
   '/api/public/outcomes-mark-sent': typeof ApiPublicOutcomesMarkSentRoute
+  '/api/public/record-outcome': typeof ApiPublicRecordOutcomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/public/decisions-read': typeof ApiPublicDecisionsReadRoute
   '/api/public/outcomes-due': typeof ApiPublicOutcomesDueRoute
   '/api/public/outcomes-mark-sent': typeof ApiPublicOutcomesMarkSentRoute
+  '/api/public/record-outcome': typeof ApiPublicRecordOutcomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -54,6 +62,7 @@ export interface FileRoutesById {
   '/api/public/decisions-read': typeof ApiPublicDecisionsReadRoute
   '/api/public/outcomes-due': typeof ApiPublicOutcomesDueRoute
   '/api/public/outcomes-mark-sent': typeof ApiPublicOutcomesMarkSentRoute
+  '/api/public/record-outcome': typeof ApiPublicRecordOutcomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -62,18 +71,21 @@ export interface FileRouteTypes {
     | '/api/public/decisions-read'
     | '/api/public/outcomes-due'
     | '/api/public/outcomes-mark-sent'
+    | '/api/public/record-outcome'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/api/public/decisions-read'
     | '/api/public/outcomes-due'
     | '/api/public/outcomes-mark-sent'
+    | '/api/public/record-outcome'
   id:
     | '__root__'
     | '/'
     | '/api/public/decisions-read'
     | '/api/public/outcomes-due'
     | '/api/public/outcomes-mark-sent'
+    | '/api/public/record-outcome'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -81,6 +93,7 @@ export interface RootRouteChildren {
   ApiPublicDecisionsReadRoute: typeof ApiPublicDecisionsReadRoute
   ApiPublicOutcomesDueRoute: typeof ApiPublicOutcomesDueRoute
   ApiPublicOutcomesMarkSentRoute: typeof ApiPublicOutcomesMarkSentRoute
+  ApiPublicRecordOutcomeRoute: typeof ApiPublicRecordOutcomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -113,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOutcomesMarkSentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/record-outcome': {
+      id: '/api/public/record-outcome'
+      path: '/api/public/record-outcome'
+      fullPath: '/api/public/record-outcome'
+      preLoaderRoute: typeof ApiPublicRecordOutcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -121,6 +141,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDecisionsReadRoute: ApiPublicDecisionsReadRoute,
   ApiPublicOutcomesDueRoute: ApiPublicOutcomesDueRoute,
   ApiPublicOutcomesMarkSentRoute: ApiPublicOutcomesMarkSentRoute,
+  ApiPublicRecordOutcomeRoute: ApiPublicRecordOutcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

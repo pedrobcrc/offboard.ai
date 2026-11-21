@@ -92,6 +92,13 @@
       "when": 1795296715808,
       "tag": "0012_n8n_outcome_helpers",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795303515454,
+      "tag": "0013_n8n_outcome_record",
+      "breakpoints": true
     }
   ]
 }

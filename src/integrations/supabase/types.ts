@@ -382,6 +382,15 @@ export type Database = {
         }[]
       }
       index_document: { Args: { p_document_id: string }; Returns: number }
+      n8n_outcome_record: {
+        Args: {
+          p_comment: string
+          p_proposal_id: string
+          p_supplier_term_lost: boolean
+          p_worked: string
+        }
+        Returns: Json
+      }
       n8n_outcomes_due: { Args: { p_days: number }; Returns: Json }
       n8n_outcomes_mark_sent: { Args: { p_items: Json }; Returns: number }
       reset_task_demo: { Args: never; Returns: undefined }

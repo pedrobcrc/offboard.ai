@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Add and verify record-outcome with strict validation, service-role-only execution and first-answer-wins semantics; leave existing objects unchanged.
 - [x] Add and verify the two secret-protected outcome endpoints and service-role-only helpers, preserving existing database objects and pages.
 - [x] Enforce the shared 90% handover cap in prompts, validation, buyer warnings and database checks; test Laura's distribution without approval and reset it.
 - [x] Support any departing buyer: offboardings with their own files, tasks and decision log, switcher, 3-step creation form with CSV import, generic AI prompts, read-only completed history.
