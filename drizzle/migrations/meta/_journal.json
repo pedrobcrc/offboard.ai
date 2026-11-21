@@ -78,6 +78,13 @@
       "when": 1794690653644,
       "tag": "0010_workload_safety_cap",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795282482959,
+      "tag": "0011_allocation_outcomes_table",
+      "breakpoints": true
     }
   ]
 }

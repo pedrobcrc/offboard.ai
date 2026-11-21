@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      allocation_outcomes: {
+        Row: {
+          answered_at: string | null
+          comment: string | null
+          created_at: string
+          due_date: string
+          id: string
+          offboarding_id: string
+          proposal_id: string
+          request_sent_at: string | null
+          supplier_term_lost: boolean | null
+          task_id: string
+          worked: string | null
+        }
+        Insert: {
+          answered_at?: string | null
+          comment?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          offboarding_id: string
+          proposal_id: string
+          request_sent_at?: string | null
+          supplier_term_lost?: boolean | null
+          task_id: string
+          worked?: string | null
+        }
+        Update: {
+          answered_at?: string | null
+          comment?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          offboarding_id?: string
+          proposal_id?: string
+          request_sent_at?: string | null
+          supplier_term_lost?: boolean | null
+          task_id?: string
+          worked?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allocation_outcomes_offboarding_id_fkey"
+            columns: ["offboarding_id"]
+            isOneToOne: false
+            referencedRelation: "offboardings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_chunks: {
         Row: {
           chunk_index: number
