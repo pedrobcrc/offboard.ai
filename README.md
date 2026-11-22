@@ -184,21 +184,23 @@ The answer is saved next to the original decision and shown in the app's Workloa
 Two n8n workflows. They talk to the app through three backend endpoints that check a shared secret header, so n8n never gets direct access to the database.
 
 ```mermaid
-flowchart LR
+flowchart TB
   subgraph W1["Workflow 1: Send 90-day checks"]
-    A["Schedule, daily 9:00"] --> B["Config: DAYS, MANAGER_EMAIL, FORM_URL"]
+    direction LR
+    A["Schedule, daily 9:00"] --> B["Config"]
     B --> C["Get due outcomes"]
     C --> D["Group by handover"]
     D --> E["Build email"]
-    E --> F["Send email (Gmail)"]
+    E --> F["Send email"]
     F --> G["Mark as sent"]
   end
   subgraph W2["Workflow 2: Record outcome"]
+    direction LR
     H["Form submitted"] --> I["Save answer"]
-    I --> J{"Response code"}
+    I --> J["Check response code"]
     J --> K["Reply to manager"]
   end
-  F -. "link per task" .-> H
+  W1 -. "email with a link per task" .-> W2
 ```
 
 **Workflow 1** finds the tasks that are due. It takes the latest decision for each task, keeps it only if it was an approve or a reassign at least DAYS days ago, and skips any task that already got a check. One email goes out per handover (one handover, one manager). Tasks are marked as sent only after the email is sent, so running the workflow again sends nothing new.
