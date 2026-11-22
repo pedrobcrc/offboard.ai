@@ -162,6 +162,92 @@ The app was built through prompts, not hand-written code, in five rounds:
 
 Built by **Pedro Ribeiro da Cunha** (Master in Management, IE Business School) and used in two IE courses, autumn 2026:
 - *Artificial Intelligence and Strategic Decisions* (Prof. Danilo Messinese): decision analysis, app and report.
+
+## 90-day outcome check (n8n)
+
+### The problem
+
+Offboard.AI proposes who should take over each task when someone leaves. The manager approves the proposal or overrides it, and the app logs that decision. Nothing checked later whether the allocation actually worked, so there was no way to tell if the AI's proposals or the manager's overrides were the better call.
+
+### What it does
+
+Ninety days after a handover decision, the manager gets one email per handover, with a link for each task. Each link opens a short form:
+
+- Did the allocation work? (yes / partly / no)
+- Was any supplier term lost? (yes / no)
+- Comment (optional)
+
+The answer is saved next to the original decision and shown in the app's Workload allocation table, along with two counts: checks answered and supplier terms lost.
+
+### How it works
+
+Two n8n workflows. They talk to the app through three backend endpoints that check a shared secret header, so n8n never gets direct access to the database.
+
+```mermaid
+flowchart LR
+  subgraph W1["Workflow 1: Send 90-day checks"]
+    A["Schedule, daily 9:00"] --> B["Config: DAYS, MANAGER_EMAIL, FORM_URL"]
+    B --> C["Get due outcomes"]
+    C --> D["Group by handover"]
+    D --> E["Build email"]
+    E --> F["Send email (Gmail)"]
+    F --> G["Mark as sent"]
+  end
+  subgraph W2["Workflow 2: Record outcome"]
+    H["Form submitted"] --> I["Save answer"]
+    I --> J{"Response code"}
+    J --> K["Reply to manager"]
+  end
+  F -. "link per task" .-> H
+```
+
+**Workflow 1** finds the tasks that are due. It takes the latest decision for each task, keeps it only if it was an approve or a reassign at least DAYS days ago, and skips any task that already got a check. One email goes out per handover (one handover, one manager). Tasks are marked as sent only after the email is sent, so running the workflow again sends nothing new.
+
+**Workflow 2** saves the answer to the row Workflow 1 created, found by the task's `proposal_id`. The first answer wins: the form has no login, so a second answer can't overwrite the first one.
+
+![Workflow 1](docs/n8n/workflow-1-send-checks.png)
+![Check email](docs/n8n/check-email.png)
+![Outcome form](docs/n8n/outcome-form.png)
+![Workflow 2](docs/n8n/workflow-2-record-outcome.png)
+![Outcomes in the app](docs/n8n/app-outcomes-table.png)
+
+### What the form tells the manager
+
+The form only replies after the save, and it says what actually happened:
+
+| Save result | Message |
+|---|---|
+| 200 | Thanks, your answer was saved |
+| 409 | This task was already answered |
+| 400 or 404 | This link isn't valid |
+| anything else | Something went wrong |
+
+### Test mode
+
+The Config node in Workflow 1 has a `DAYS` value: 90 for real use, 0 for testing. With 0, every approved or reassigned task is due right away, so you can test the loop without waiting three months. Run it once and you get the email. Run it again and nothing is sent. To repeat the test, the outcomes have to be cleared first (Reset demo in the app does this, together with the demo decisions).
+
+In this demo the schedule is off and Workflow 1 is run by hand, with `DAYS = 0`.
+
+### Why there's no term-lost alert
+
+I first built an alert email for when a supplier term was lost, then removed it. It went to the same manager who had just reported the loss, and at 90 days the loss has already happened, so the alert couldn't prevent anything. `supplier_term_lost` is kept as a count for the business case. A useful warning would be a separate workflow that reminds the new owner a few days before a task's due date. Not built yet.
+
+### Not built yet
+
+The outcomes aren't fed back into the allocation logic. For now the loop only collects them.
+
+### Files
+
+Both workflows are exported in [`/n8n`](n8n):
+
+- `n8n/send-90-day-checks.json`
+- `n8n/record-outcome.json`
+
+To use them: in n8n, go to Workflows → Import from file, then re-link the credentials (the header auth secret and Gmail) and set `MANAGER_EMAIL` and `FORM_URL` in the Config node. The exports contain no secret values.
+
+### Note
+
+All data is fictional. This shows the loop working, not real results. Built with n8n and Lovable, with Claude's help.
 - *Product Management: from Ideation to Market Success* (Prof. Pablo Delgado Cano): product plan, requirements and roadmap.
 
 Developed during group coursework at IE. The app, the decision analysis and the product plan are my own work.
