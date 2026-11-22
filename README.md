@@ -207,11 +207,25 @@ flowchart TB
 
 **Workflow 2** saves the answer to the row Workflow 1 created, found by the task's `proposal_id`. The first answer wins: the form has no login, so a second answer can't overwrite the first one.
 
-![Workflow 1](docs/n8n/workflow-1-send-checks.png)
-![Check email](docs/n8n/check-email.png)
-![Outcome form](docs/n8n/outcome-form.png)
-![Workflow 2](docs/n8n/workflow-2-record-outcome.png)
-![Outcomes in the app](docs/n8n/app-outcomes-table.png)
+**Workflow 1: Send 90-day checks**
+
+![Workflow 1](n8n/workflow-1-send-checks.png)
+
+**The check email** (one per handover, a link per task)
+
+![Check email](n8n/check-email.png)
+
+**The form** (the task name comes from the link)
+
+![Outcome form](n8n/outcome-form.png)
+
+**Workflow 2: Record outcome**
+
+![Workflow 2](n8n/workflow-2-record-outcome.png)
+
+**Outcomes in the app** (next to the AI proposal and any manager override)
+
+![Outcomes in the app](n8n/app-outcomes-table.png)
 
 ### What the form tells the manager
 
@@ -240,7 +254,7 @@ The outcomes aren't fed back into the allocation logic. For now the loop only co
 
 ### Files
 
-Both workflows are exported in [`/n8n`](n8n):
+Both workflows are exported in [`/n8n`](n8n), together with the screenshots above:
 
 - `n8n/send-90-day-checks.json`
 - `n8n/record-outcome.json`
