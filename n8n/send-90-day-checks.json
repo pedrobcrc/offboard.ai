@@ -1,0 +1,245 @@
+{
+  "name": "Send 90-day checks",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ffb95c2b-0d07-4d82-a857-bd52990784dc",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d2afb6aa-4a99-4916-973c-db51cbc234e3",
+              "name": "DAYS",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "6b1316e1-7c74-4e19-aafa-a428c726518d",
+              "name": "MANAGER_EMAIL",
+              "value": "manager@example.com",
+              "type": "string"
+            },
+            {
+              "id": "9973a20c-efce-45dc-8b49-77384f48fa54",
+              "name": "FORM_URL",
+              "value": "https://pedrobcrc.app.n8n.cloud/form/7a1fe03d-d3cd-447a-b66c-750b2ec4286b",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "3cf6e794-0c37-4e87-bc00-80bab01cbd82",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://offboard-ai.lovable.app/api/public/outcomes-due",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"days\": {{ $json.DAYS }} }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "ab04ba6a-fac2-4b04-91f8-0a99d8a3499b",
+      "name": "Get due outcomes",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "IrQO0tjmOmnw7TxJ",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.first().json.rows || [];\nconst groups = {};\nfor (const r of rows) {\n  if (!groups[r.offboarding_id]) groups[r.offboarding_id] = [];\n  groups[r.offboarding_id].push(r);\n}\nreturn Object.entries(groups).map(([offboarding_id, tasks]) => ({\n  json: { offboarding_id, task_count: tasks.length, tasks }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "54331f40-1041-42b9-98fc-fd0efe6ee7ec",
+      "name": "Group by handover"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const cfg = $('Config').first().json;\nconst esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\nconst list = $json.tasks.map(t => {\n  const link = `${cfg.FORM_URL}?proposal_id=${encodeURIComponent(t.proposal_id)}&Task=${encodeURIComponent(t.task_title)}`;\n  return `<li>${esc(t.task_title)} (${t.action}d on ${t.created_at.slice(0,10)}): <a href=\"${link}\">Give feedback</a></li>`;\n}).join('');\nreturn {\n  json: {\n    ...$json,\n    to: cfg.MANAGER_EMAIL,\n    subject: `Handover check: ${$json.task_count} task allocations to review`,\n    html: `<p>Hi,</p><p>These tasks were handed over to a new owner. For each one, please tell us whether the allocation worked (one short form per task):</p><ul>${list}</ul><p>Thanks,<br>Offboard.AI</p>`\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ],
+      "id": "ad97c9f8-49ba-44e0-a40b-89e80db87b86",
+      "name": "Build email"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "8ad5a8e4-a685-427f-ba4d-a23aeaa7c5df",
+      "name": "Send check email",
+      "webhookId": "e0a02809-ac87-4eca-82c9-2182ad17e8cf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yWgWkk28E9BOCRco",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://offboard-ai.lovable.app/api/public/outcomes-mark-sent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ items: $('Build email').item.json.tasks.map(t => ({ proposal_id: t.proposal_id, task_id: t.task_id, offboarding_id: t.offboarding_id, due_date: t.due_date })) }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "87aed6d8-430c-4a6e-9183-d152ee62a733",
+      "name": "Mark as sent",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "IrQO0tjmOmnw7TxJ",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Get due outcomes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get due outcomes": {
+      "main": [
+        [
+          {
+            "node": "Group by handover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group by handover": {
+      "main": [
+        [
+          {
+            "node": "Build email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build email": {
+      "main": [
+        [
+          {
+            "node": "Send check email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send check email": {
+      "main": [
+        [
+          {
+            "node": "Mark as sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8a6b1d73-de2d-4d22-8a02-3e96e1c04253",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cc877639e660b4f86ef20e3b95177d272b1379349373038a07dc887438133847"
+  },
+  "nodeGroups": [],
+  "id": "ChKcBNpkChfOsXU3",
+  "tags": []
+}

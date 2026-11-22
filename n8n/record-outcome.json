@@ -1,0 +1,361 @@
+{
+  "name": "Record outcome",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "90-day handover check",
+        "formDescription": "One question set per task. Takes 30 seconds",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Task"
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "proposal_id"
+            },
+            {
+              "fieldLabel": "Did the allocation work?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "yes"
+                  },
+                  {
+                    "option": "partly"
+                  },
+                  {
+                    "option": "no"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Was any supplier term lost?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "yes"
+                  },
+                  {
+                    "option": "no"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Comment",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -256,
+        -32
+      ],
+      "id": "8443df39-4e68-4766-8e85-e828519d4fbf",
+      "name": "On form submission",
+      "webhookId": "7a1fe03d-d3cd-447a-b66c-750b2ec4286b"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://offboard-ai.lovable.app/api/public/record-outcome",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"proposal_id\": \"{{ $json.proposal_id }}\",\n  \"worked\": \"{{ $json['Did the allocation work?'] }}\",\n  \"supplier_term_lost\": {{ $json['Was any supplier term lost?'] === 'yes' }},\n  \"comment\": {{ JSON.stringify($json.Comment || null) }}\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -96,
+        -32
+      ],
+      "id": "803dcb7d-4583-4664-9768-3ec29dcbcfdf",
+      "name": "Save answer",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "IrQO0tjmOmnw7TxJ",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 200,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "8c29e0b2-e5d8-4f23-ae6f-5267495d6fdf"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "saved"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "21d31393-3404-4b33-8223-67b39beb07d1",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 409,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "already answered"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "708017ca-4a01-4ac7-ad41-87fbc23c8b03",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 400,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "invalid 400"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "9334e917-cdb6-42bf-883a-afa9a399abd5",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 404,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "invalid 404"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        128,
+        -80
+      ],
+      "id": "7ac741d9-2e7f-410a-b1fd-59c671dbb5f2",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Thanks, your answer was saved",
+        "completionMessage": "You can close this page.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        336,
+        -304
+      ],
+      "id": "c1ff0a49-1017-491a-b923-2e446e59a43c",
+      "name": "Saved",
+      "webhookId": "3eedb8cf-46ad-4446-8be2-444b9d4bdbe0"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "This task was already answered",
+        "completionMessage": "The first answer is kept. You can close this page.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        384,
+        -160
+      ],
+      "id": "b58167b6-60c8-4c95-b2d0-58a2cad394eb",
+      "name": "Already answered",
+      "webhookId": "4e3df705-9b87-4105-bad8-7e6f1f126a06"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "This link isn't valid",
+        "completionMessage": "Please use the link from your 90-day check email.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        368,
+        16
+      ],
+      "id": "b0d5abe1-be85-411d-a872-9528b53d0f8f",
+      "name": "Invalid link",
+      "webhookId": "ca1500e8-a733-4a3c-9f05-0e1e012a1425"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Something went wrong",
+        "completionMessage": "Please try again later.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        352,
+        192
+      ],
+      "id": "7619a7cb-3ed6-4630-b67b-1e82d758de57",
+      "name": "Error",
+      "webhookId": "e7b2fec6-7707-4d75-b076-360d6c9bb2c4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Save answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save answer": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Saved",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Already answered",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bcc31571-dafc-4124-9d57-5ab8ab7f05b2",
+  "meta": {
+    "instanceId": "cc877639e660b4f86ef20e3b95177d272b1379349373038a07dc887438133847"
+  },
+  "nodeGroups": [],
+  "id": "5OdsbT6SGk5VOwKs",
+  "tags": []
+}
