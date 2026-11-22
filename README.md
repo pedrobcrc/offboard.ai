@@ -217,7 +217,7 @@ flowchart TB
 
 **The form** (the task name comes from the link)
 
-![Outcome form](n8n/outcome-form.png)
+![Outcome form](n8n/![Outcome form](n8n/outcome-form.png).png)
 
 **Workflow 2: Record outcome**
 
