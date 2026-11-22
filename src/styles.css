@@ -203,9 +203,9 @@ td {padding:19px 22px; border-top:1px solid var(--border); line-height:1.8;} td:
 .allocation-table {width:100%; min-width:0; table-layout:fixed;}
 .allocation-table th,.allocation-table td {padding:15px 8px; white-space:normal; overflow-wrap:anywhere; vertical-align:top;}
 .allocation-table th:first-child {width:22%;} .allocation-table th:nth-child(2) {width:8%;}
-.allocation-table th:nth-child(3) {width:10%;} .allocation-table th:nth-child(4) {width:32%;}
+.allocation-table th:nth-child(3) {width:10%;} .allocation-table th:nth-child(4) {width:23%;}
 .allocation-table th:nth-child(5) {width:8%;} .allocation-table th:nth-child(6) {width:12%;}
-.allocation-table th:last-child {width:8%;}
+.allocation-table th:last-child {width:17%;}
 .allocation-table .source-chip {display:flex; width:100%; min-width:0; text-align:left;}
 .allocation-table .source-chip svg {flex-shrink:0;}
 .allocation-table .source-chip span {min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
