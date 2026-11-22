@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Display scoped read-only 90-day outcomes and metrics, include outcomes in atomic sample reset, and verify current seven checks without resetting them.
 - [x] Add and verify record-outcome with strict validation, service-role-only execution and first-answer-wins semantics; leave existing objects unchanged.
 - [x] Add and verify the two secret-protected outcome endpoints and service-role-only helpers, preserving existing database objects and pages.
 - [x] Enforce the shared 90% handover cap in prompts, validation, buyer warnings and database checks; test Laura's distribution without approval and reset it.

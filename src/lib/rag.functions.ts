@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { WORKLOAD_CAP, isWorkloadWarning, allocateWithRetry, allocationSystemPrompt, buyerEditSchema, newOffboardingSchema, newTasksSchema, projectedWorkload, reviewSchema, type Criticality } from "@/lib/task-router";
+import type { AllocationOutcome } from "@/lib/allocation-outcomes";
 import { NOT_FOUND_ANSWER } from "@/lib/procurement-demo";
 
 /** Files the upload flow can read: plain text formats plus PDF (text extracted in the browser). */
@@ -42,6 +43,7 @@ export type TaskRow = {
   rationale: string | null;
   aiProposedBuyer: string | null;
   overridden: boolean;
+  proposalId: string | null;
 };
 
 export const SAMPLE_OFFBOARDING_ID = "00000000-0000-4000-8000-0000000000a1";
@@ -61,6 +63,7 @@ export type Workspace = {
   documents: DocumentRow[];
   team: TeamRow[];
   tasks: TaskRow[];
+  outcomes: AllocationOutcome[];
   decisions: Database["public"]["Tables"]["task_decisions"]["Row"][];
   departingBuyer: { name: string; role: string; departingOn: string } | null;
 };
@@ -130,7 +133,9 @@ export const getWorkspace = createServerFn({ method: "GET" })
   if (ob.error) throw new Error(ob.error.message);
   if (!ob.data) throw new Error("Offboarding not found.");
   const offboarding = toOffboarding(ob.data);
-  const [documents, team, tasks, info, decisions] = await Promise.all([
+  // The offboarding above is publicly visible; expose only its requested read-only outcome projection.
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const [documents, team, tasks, info, decisions, outcomes] = await Promise.all([
     supabase
       .from("documents")
       .select("id, filename, kind, size_label, detail")
@@ -142,7 +147,7 @@ export const getWorkspace = createServerFn({ method: "GET" })
       .order("position", { ascending: true }),
     supabase
       .from("tasks")
-      .select("id, title, status, supplier, due_date, criticality, confidence, source_file, assigned_member_id, assigned_buyer, assigned_initials, assigned_tone, rationale, ai_proposed_buyer, overridden")
+      .select("id, title, status, supplier, due_date, criticality, confidence, source_file, assigned_member_id, assigned_buyer, assigned_initials, assigned_tone, rationale, ai_proposed_buyer, overridden, proposal_id")
       .eq("offboarding_id", offboarding.id)
       .order("position", { ascending: true }),
     supabase
@@ -151,14 +156,16 @@ export const getWorkspace = createServerFn({ method: "GET" })
       .eq("id", 1)
       .maybeSingle(),
     supabase.from("task_decisions").select("*").eq("offboarding_id", offboarding.id).order("created_at", { ascending: false }),
+    supabaseAdmin.from("allocation_outcomes").select("proposal_id, worked, supplier_term_lost, comment, request_sent_at, answered_at").eq("offboarding_id", offboarding.id),
   ]);
 
   void info;
-  const firstError = documents.error || team.error || tasks.error || info.error || decisions.error;
+  const firstError = documents.error || team.error || tasks.error || info.error || decisions.error || outcomes.error;
   if (firstError) throw new Error(firstError.message);
 
   return {
     decisions: decisions.data ?? [],
+    outcomes: outcomes.data ?? [],
     documents: (documents.data ?? []).map((row) => ({
       id: row.id,
       filename: row.filename,
@@ -187,6 +194,7 @@ export const getWorkspace = createServerFn({ method: "GET" })
       rationale: row.rationale,
       aiProposedBuyer: row.ai_proposed_buyer,
       overridden: row.overridden,
+      proposalId: row.proposal_id,
     })),
     offboarding,
     departingBuyer: { name: offboarding.departingName, role: offboarding.departingRole, departingOn: offboarding.lastWorkingDay },
@@ -397,7 +405,11 @@ export const approveRemaining = createServerFn({ method: "POST" })
   return error ? { ok: false as const, message: error.message } : { ok: true as const };
 });
 export const resetTaskDemo = createServerFn({ method: "POST" }).handler(async () => {
-  const { error } = await publicClient().rpc("reset_task_demo");
+  const supabase = publicClient();
+  const offboarding = await loadOffboarding(supabase, SAMPLE_OFFBOARDING_ID);
+  if (!offboarding?.isSample) return { ok: false as const, message: "Sample offboarding not found." };
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.rpc("reset_demo_with_outcomes");
   return error ? { ok: false as const, message: error.message } : { ok: true as const };
 });
 

@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Application architecture
+- Load outcome projections server-side only after resolving a publicly visible offboarding; keep outcome policies closed and use a service-role-only wrapper for atomic sample reset including outcomes.
 - Record outcomes through a row-locking, service-role-only helper so concurrent answers cannot overwrite the first response or create missing allocations.
 - Outcome endpoints authorize the n8n header before loading the privileged client and bind inputs to service-role-only SQL helpers, preserving exact query semantics without exposing database execution to visitors.
 - Serve external decision-log reads at `/api/public/decisions-read`; authorize the shared header before loading the service-role client, and use SELECT only so n8n cannot modify workspace data.

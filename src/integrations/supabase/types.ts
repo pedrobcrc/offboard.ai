@@ -393,6 +393,7 @@ export type Database = {
       }
       n8n_outcomes_due: { Args: { p_days: number }; Returns: Json }
       n8n_outcomes_mark_sent: { Args: { p_items: Json }; Returns: number }
+      reset_demo_with_outcomes: { Args: never; Returns: undefined }
       reset_task_demo: { Args: never; Returns: undefined }
       review_task: {
         Args: {
