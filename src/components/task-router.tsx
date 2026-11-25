@@ -97,28 +97,22 @@ export function TaskRouter({ workspace, readOnly = false }: { workspace: Workspa
         return <div className="buyer-card" key={person.id}>
           <div className="buyer-top">
             <strong className="buyer-name">{person.name}</strong>
-            <div className="buyer-controls">
-              <span className={`workload ${loadTone(load)}`}>{load !== person.capacity ? `${person.capacity}% → ` : ""}{load}%</span>
-              {!readOnly && <Button variant="ghost" size="icon" className="buyer-edit" aria-label={`Edit ${person.name}`} title={`Edit ${person.name}`} disabled={busy} onClick={() => { setEditError(""); setEditing({ ...person }); }}><Pencil size={13} /></Button>}
-            </div>
+            {!readOnly && <Button variant="ghost" size="icon" className="buyer-edit" aria-label={`Edit ${person.name}`} title={`Edit ${person.name}`} disabled={busy} onClick={() => { setEditError(""); setEditing({ ...person }); }}><Pencil size={13} /></Button>}
           </div>
           <p className="buyer-expertise">{person.expertise}</p>
+          <p className={`buyer-load load-${loadTone(load)}`}>{load !== person.capacity ? `${person.capacity}% → ` : ""}{load}%</p>
           <div className="capacity-track" role="progressbar" aria-label={`${person.name}'s workload`} aria-valuenow={load} aria-valuemin={0} aria-valuemax={100}><span className={`capacity-fill ${loadTone(load)}`} style={{ width: `${Math.min(100, load)}%` }} /></div>
         </div>;
       })}
     </div>
-    {pending.length > 0 && <div className="panel pending-panel">
-      <div className="panel-head"><h2 className="panel-title">Pending tasks</h2><span className="count-badge">{pending.length}</span></div>
+    {pending.length > 0 && <div className="pending-section">
+      <h2 className="panel-title">Pending tasks</h2>
       <div className="task-body">{pending.map((task) => <div className="pending-task" key={task.id}><div className="task-detail"><strong>{task.title}</strong><p>{task.supplier} · Due {dueLabel(task.dueDate)}</p></div><span className={`task-criticality ${task.criticality === "High" ? "criticality-high" : ""}`}>{task.criticality}</span></div>)}</div>
     </div>}
     {!readOnly && <div className="action-row" id="distribute-section">
-      <div className="review-toolbar">
-        {pending.length > 0 && <Button onClick={allocate} disabled={busy}>{busy && <Loader2 className="animate-spin" size={15} />}{busy ? "Matching tasks to your team…" : "Distribute Workload via AI"}</Button>}
-        {hasProposed && <Button variant={pending.length === 0 ? "default" : "outline"} disabled={busy} onClick={() => runDecision(() => approveAll({ data: { offboardingId } }))}><Check size={14} />Approve all remaining</Button>}
-      </div>
-      <div className="review-toolbar">
-        {isSample ? <Button variant="ghost" onClick={() => setResetOpen(true)} disabled={busy}><RotateCcw size={14} />Reset demo</Button> : <Button variant={canComplete ? "default" : "outline"} disabled={busy || !canComplete} onClick={() => runDecision(() => complete({ data: { offboardingId } }))}><Check size={14} />Mark offboarding complete</Button>}
-      </div>
+      {pending.length > 0 && <Button onClick={allocate} disabled={busy}>{busy && <Loader2 className="animate-spin" size={15} />}{busy ? "Matching tasks to your team…" : "Distribute Workload via AI"}</Button>}
+      {hasProposed && <Button variant={pending.length === 0 ? "default" : "outline"} disabled={busy} onClick={() => runDecision(() => approveAll({ data: { offboardingId } }))}><Check size={14} />Approve all remaining</Button>}
+      {isSample ? <Button variant="ghost" onClick={() => setResetOpen(true)} disabled={busy}><RotateCcw size={14} />Reset demo</Button> : <Button variant={canComplete ? "default" : "outline"} disabled={busy || !canComplete} onClick={() => runDecision(() => complete({ data: { offboardingId } }))}><Check size={14} />Mark offboarding complete</Button>}
     </div>}
     {error && <p role="alert" className="ingestion-error">{error}</p>}
     <dl className="metrics-grid">
@@ -129,7 +123,7 @@ export function TaskRouter({ workspace, readOnly = false }: { workspace: Workspa
       <div><dt>Estimated time saved</dt><dd>{metrics.hoursSaved} hours<span className="metric-note">6h manual vs 0.5h per approved task</span></dd></div>
     </dl>
     {readOnly && (() => { const summary = demoSummary(workspace.team, workspace.tasks, workspace.decisions); return <div className="demo-summary"><p className="demo-summary-title">Offboarding completed — every task has an approved owner.</p><p>Tasks reassigned <strong>{summary.reassigned}</strong><span className="mx-2">·</span>Manager overrides <strong>{summary.overrides}</strong> ({summary.overrideRate}% override rate, {summary.rejected} rejected)</p><div className="demo-loads">{summary.loads.map((l) => <span key={l.name}>{l.name} <strong>{l.before}% → <span className={`load-${loadTone(l.after)}`}>{l.after}%</span></strong></span>)}</div></div>; })()}
-    <div className="panel" id="review-section" aria-live="polite"><div className="panel-head"><div><h2 className="panel-title">Workload allocation</h2><p className="panel-subtitle">{readOnly ? "Completed offboarding, read-only record" : "AI proposes, manager decides"}</p></div><span className="count-badge">{assigned.length ? `${metrics.approved} approved` : "Awaiting allocation"}</span></div>
+    <div className="allocation-section" id="review-section" aria-live="polite"><div className="allocation-head"><h2 className="panel-title">Workload allocation</h2><p className="panel-subtitle">{readOnly ? "Completed offboarding, read-only record" : "AI proposes, manager decides"}</p></div>
       {assigned.length ? <div className="table-wrap"><table className="allocation-table"><thead><tr>{["Task", "Owner and reason", "Source", "Status"].map((label) => <th key={label}>{label}</th>)}</tr></thead><tbody>{assigned.map((task) => {
         const outcome = outcomeForProposal(task.proposalId, workspace.outcomes);
         const buyer = workspace.team.find((person) => person.id === task.assignedMemberId);
