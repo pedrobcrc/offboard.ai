@@ -96,7 +96,7 @@ export function NewOffboarding({ open, onOpenChange, onDone }: { open: boolean; 
       <Button type="submit" disabled={busy || !whoReady}>{busy ? <Loader2 className="animate-spin" /> : <ArrowRight size={14} />}Continue</Button>
     </form>}
     {step === 1 && <div className="buyer-form">
-      <div className="drop-zone"><div className="upload-icon">{busy ? <Loader2 className="animate-spin" size={22} /> : <UploadCloud size={23} strokeWidth={1.6} />}</div><h3>{busy ? "Adding documents…" : "Add their documents"}</h3><Button variant="outline" size="sm" disabled={busy} onClick={() => fileInput.current?.click()}>Browse files</Button><input ref={fileInput} type="file" multiple accept=".txt,.md,.eml,.csv,.pdf" hidden aria-label="Offboarding files" onChange={(e) => upload(e.target.files)} /><p className="file-types">PDF, EML, TXT, MD & CSV</p></div>
+      <div className="drop-zone"><h3>{busy ? "Adding documents…" : "Add their documents"}</h3><Button variant="outline" size="sm" disabled={busy} onClick={() => fileInput.current?.click()}>Browse files</Button><input ref={fileInput} type="file" multiple accept=".txt,.md,.eml,.csv,.pdf" hidden aria-label="Offboarding files" onChange={(e) => upload(e.target.files)} /><p className="file-types">PDF, EML, TXT, MD & CSV</p></div>
       {files.map((f) => <p className="wizard-file" key={f}><FileText size={13} />{f}<Check size={13} className="file-check" /></p>)}
       {error && <p role="alert" className="ingestion-error">{error}</p>}
       <Button disabled={busy} onClick={() => { setError(""); setStep(2); }}><ArrowRight size={14} />{files.length ? "Continue" : "Skip for now"}</Button>

@@ -24,7 +24,7 @@ export function DemoGuide({ workspace, states, current, complete, starting, erro
       <ol className="demo-steps">{DEMO_STEPS.map((step, i) => <li key={step.id}>
         <Button variant="ghost" className={`demo-step ${states[i]}`} aria-current={states[i] === "current" ? "step" : undefined} onClick={() => onStep(i)}>
           <span className="demo-step-dot">{states[i] === "done" ? <Check size={12} /> : i + 1}</span>
-          <span className="demo-step-text"><span>{step.label}</span><small>{states[i] === "done" ? "Done" : states[i] === "current" ? "Current" : "Upcoming"}</small></span>
+          <span className="demo-step-text">{step.label}<span className="sr-only"> — {states[i] === "done" ? "Done" : states[i] === "current" ? "Current" : "Upcoming"}</span></span>
         </Button>
       </li>)}</ol>
       <Button onClick={onStart} disabled={starting} className="demo-start">{starting ? <Loader2 className="animate-spin" /> : complete ? <RotateCcw size={14} /> : <Play size={14} />}{complete ? "Restart demo" : "Start demo"}</Button>
